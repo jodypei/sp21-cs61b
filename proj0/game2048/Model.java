@@ -113,7 +113,41 @@ public class Model extends Observable {
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
+        board.setViewingPerspective(side);
 
+        boolean[][] merged = new boolean[board.size()][board.size()];
+        for (int column = 0; column < board.size(); column++) {
+            for (int row = 2; row >= 0; row--) {
+
+                Tile t = board.tile(column, row);  /* 待操作方块 */
+                if (t != null) {
+                    int Edge = row + 1;
+                    while (Edge <= 3) {
+                        Tile tmp = board.tile(column, Edge);
+                        if (tmp != null) {
+                            /* 先判断目标位置是否发生过merge或value和当前方块不同 */
+                            if (merged[column][Edge] == true || t.value() != tmp.value()) {
+                                Edge -= 1;
+                            }
+                            break;
+                        }
+                        if (Edge == 3) {
+                            break;
+                        }
+                        Edge++;
+                    }
+                    if (Edge != row) {
+                        changed = true;
+                    }
+                    if (board.move(column, Edge, t)) {
+                        merged[column][Edge] = true;
+                        score += board.tile(column, Edge).value();
+                    }
+                }
+            }
+        }
+
+        board.setViewingPerspective(Side.NORTH);
         checkGameOver();
         if (changed) {
             setChanged();
@@ -138,7 +172,20 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
-        return false;
+        int count = 0;
+        for (int tmp_c = 0; tmp_c < b.size(); tmp_c++) {
+            for (int tmp_r = 0; tmp_r < b.size(); tmp_r++) {
+                if (b.tile(tmp_c, tmp_r) == null) {
+                    count++;
+                }
+            }
+        }
+        if (count != 0) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     /**
@@ -148,6 +195,15 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        for (int tmp_c = 0; tmp_c < b.size(); tmp_c++) {
+            for (int tmp_r = 0; tmp_r < b.size(); tmp_r++) {
+                if (b.tile(tmp_c, tmp_r) != null) {
+                    if (b.tile(tmp_c, tmp_r).value() == MAX_PIECE) {
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
     }
 
@@ -159,6 +215,37 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if (emptySpaceExists(b)) {
+            return true;
+        }
+        else {
+            /* 检查DOWN & UP, 前半部分检查上三行，后半部分检查第一行 */
+            for (int checkDown = 1; checkDown < b.size(); checkDown++) {
+                for (int tmp = 0; tmp < b.size(); tmp++) {
+                    if (b.tile(tmp, checkDown).value() == b.tile(tmp, checkDown - 1).value()) {
+                        return true;
+                    }
+                }
+            }
+            for (int tmp = 0; tmp < b.size(); tmp++) {
+                if (b.tile(tmp, 0).value() == b.tile(tmp, 1).value()) {
+                    return true;
+                }
+            }
+            /* 检查LEFT & RIGHT， 同理 */
+            for (int checkLeft = 1; checkLeft < b.size(); checkLeft++) {
+                for (int tmp = 0; tmp < b.size(); tmp++) {
+                    if (b.tile(checkLeft, tmp).value() == b.tile(checkLeft - 1, tmp).value()) {
+                        return true;
+                    }
+                }
+            }
+            for (int tmp = 0; tmp < b.size(); tmp++) {
+                if (b.tile(0, tmp).value() == b.tile(1, tmp).value()) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
