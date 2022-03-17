@@ -3,6 +3,7 @@ package Dog;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
+
 public class DogTest {    
     @Test
     public void testSmall() {
