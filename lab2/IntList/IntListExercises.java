@@ -10,11 +10,7 @@ public class IntListExercises {
      */
     public static void addConstant(IntList lst, int c) {
         IntList head = lst;
-        boolean last = false;
-        while (last == false) {
-            if (head.rest == null) {
-                last = true;
-            }
+        while (head != null) {
             head.first += c;
             head = head.rest;
         }
@@ -71,7 +67,6 @@ public class IntListExercises {
      * @param lst IntList from Lecture
      * @return True if there was an update to the list
      */
-    public static boolean changed = false;
 
     public static boolean squarePrimes(IntList lst) {
         // Base Case: we have reached the end of the list
@@ -83,14 +78,8 @@ public class IntListExercises {
 
         if (currElemIsPrime) {
             lst.first *= lst.first;
-            changed = true;
         }
 
-        if (lst.rest == null) {
-            return changed;
-        }
-        else {
-            return squarePrimes(lst.rest);
-        }
+        return squarePrimes(lst.rest) || currElemIsPrime;
     }
 }
