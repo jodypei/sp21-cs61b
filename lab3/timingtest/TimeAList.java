@@ -1,5 +1,9 @@
 package timingtest;
+import com.sun.xml.internal.rngom.nc.NsNameClass;
+import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Stopwatch;
+import net.sf.saxon.om.Item;
+import org.checkerframework.checker.units.qual.A;
 
 /**
  * Created by hug.
@@ -23,5 +27,26 @@ public class TimeAList {
 
     public static void timeAListConstruction() {
         // TODO: YOUR CODE HERE
+        AList<Integer> Ns = new AList<>();
+        AList<Double> times = new AList<>();
+        AList<Integer> opCounts = new AList<>();
+        AList<Integer> test = new AList<>();
+        for (int i = 0; i <= 7; i++) {
+            Stopwatch sw = new Stopwatch();
+
+            for (int j = 0; j <= Math.pow(2,i) * 1000; j++) {
+                test.addLast(j);
+            }
+
+            Ns.addLast((int) Math.pow(2, i) * 1000);
+            times.addLast(sw.elapsedTime());
+            opCounts.addLast((int) Math.pow(2, i) * 1000);
+
+            for (int k = 0; k <= Math.pow(2, i) * 1000; k++) {
+                int rm = test.removeLast();
+            }
+        }
+
+        printTimingTable(Ns, times, opCounts);
     }
 }
