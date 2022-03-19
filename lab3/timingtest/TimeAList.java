@@ -34,7 +34,7 @@ public class TimeAList {
         for (int i = 0; i <= 7; i++) {
             Stopwatch sw = new Stopwatch();
 
-            for (int j = 0; j <= Math.pow(2,i) * 1000; j++) {
+            for (int j = 0; j <= Math.pow(2, i) * 1000; j++) {
                 test.addLast(j);
             }
 
