@@ -3,6 +3,8 @@ package deque;
 /** Array based Deque.
  *  @author 陈国检
  */
+import java.util.Iterator;
+
 public class ArrayDeque<T> {
     /**
      * @param nextFirst: 下一个队头位置索引
@@ -17,26 +19,26 @@ public class ArrayDeque<T> {
     public ArrayDeque() {
         items = (T[]) new Object[8];
         size = 0;
-        nextFirst = 0;
-        nextLast = 1;
+        nextFirst = 3;
+        nextLast = 4;
     }
 
     /** 在nextFirst位置插入元素 */
     public void addFirst(T x) {
         checkFull();
 
-        size += 1;
         items[nextFirst] = x;
-        nextFirst = stepBackward(nextLast);
+        nextFirst = stepBackward(nextFirst);
+        size += 1;
     }
 
     /** 在nextLast位置插入元素 */
     public void addLast(T x) {
         checkFull();
 
-        size += 1;
         items[nextLast] = x;
         nextLast = stepForward(nextLast);
+        size += 1;
     }
 
     /** 确认nextFirst */
@@ -87,18 +89,6 @@ public class ArrayDeque<T> {
         nextFirst = capacity - 1; /* 新的队头应该在数组尾部 */
         nextLast = size;
         items = tempArray;
-    }
-
-    /** 获取双端队列尾部元素  */
-    private T getLast() {
-        int curLast = stepBackward(nextLast);
-        return items[curLast];
-    }
-
-    /** 获取双端队列尾部元素  */
-    private T getFirst() {
-        int curFirst = stepForward(nextFirst);
-        return items[curFirst];
     }
 
     /** 删除双端队列队头的元素，并返回所删除的元素 */
