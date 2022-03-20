@@ -115,6 +115,21 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         }
     }
 
+    public T getRecursive(int index) {
+        if (index >= size || index < 0) {
+            return null;
+        } else {
+            return getRecursiveHelper(index, sentinel.next);
+        }
+    }
+
+    private T getRecursiveHelper(int index, DequeNode curNode) {
+        if (index == 0) {
+            return curNode.item;
+        }
+        return getRecursiveHelper(index - 1, curNode.next);
+    }
+
     /** 后面将要实现的Deque对象是可迭代的，所以我们需要提供这个方法来返回一个迭代器。*/
     @Override
     public Iterator<T> iterator() {
