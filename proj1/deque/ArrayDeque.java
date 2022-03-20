@@ -5,7 +5,7 @@ package deque;
  */
 import java.util.Iterator;
 
-public class ArrayDeque<T> {
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     /**
      * @param nextFirst: 下一个队头位置索引
      * @param nextLast: 下一个队尾位置索引
@@ -19,11 +19,12 @@ public class ArrayDeque<T> {
     public ArrayDeque() {
         items = (T[]) new Object[8];
         size = 0;
-        nextFirst = 3;
-        nextLast = 4;
+        nextFirst = 0;
+        nextLast = 1;
     }
 
     /** 在nextFirst位置插入元素 */
+    @Override
     public void addFirst(T x) {
         checkFull();
 
@@ -33,6 +34,7 @@ public class ArrayDeque<T> {
     }
 
     /** 在nextLast位置插入元素 */
+    @Override
     public void addLast(T x) {
         checkFull();
 
@@ -51,12 +53,15 @@ public class ArrayDeque<T> {
         return (param + 1) % items.length;
     }
 
-    /** 判空 */
+    /*
+    @Override
     public boolean isEmpty() {
         return size() == 0;
     }
+    */
 
     /** 返回数组的大小 */
+    @Override
     public int size() { return size; }
 
     /** 数组长度不够就增加空间 */
@@ -67,6 +72,7 @@ public class ArrayDeque<T> {
     }
 
     /** 从头到尾输出双端队列元素 */
+    @Override
     public void printDeque() {
         int curElem = stepForward(nextFirst);
         for (int i = 0; i < size; i += 1) {
@@ -92,6 +98,7 @@ public class ArrayDeque<T> {
     }
 
     /** 删除双端队列队头的元素，并返回所删除的元素 */
+    @Override
     public T removeFirst() {
         if (isEmpty()) {
             return null;
@@ -108,6 +115,7 @@ public class ArrayDeque<T> {
     }
 
     /** 删除双端队列队尾的元素，并返回所删除的元素 */
+    @Override
     public T removeLast() {
         if (isEmpty()) {
             return null;
@@ -127,7 +135,29 @@ public class ArrayDeque<T> {
      * 存取数组中下标为i的元素
      * @param index: 取值范围:0 ~ size-1, 0表示队头元素, 1表示第二个元素, 依次类推
      */
+    @Override
     public T get(int index) {
         return items[(nextFirst + index + 1) % items.length];
+    }
+
+    /** 后面将要实现的Deque对象是可迭代的，所以我们需要提供这个方法来返回一个迭代器。*/
+    @Override
+    public Iterator<T> iterator() {
+        return new ArrayIterator();
+    }
+
+    private class ArrayIterator implements Iterator<T> {
+        private int ptr;
+        public ArrayIterator() {
+            ptr = stepForward(nextFirst);
+        }
+        public boolean hasNext() {
+            return stepForward(ptr) != nextLast;
+        }
+        public T next() {
+            T returnItem = items[ptr];
+            ptr += 1;
+            return returnItem;
+        }
     }
 }

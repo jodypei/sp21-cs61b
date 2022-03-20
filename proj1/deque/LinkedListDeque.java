@@ -3,7 +3,10 @@ package deque;
 /** Linked list based Deque.
  *  @author 陈国检
  */
-public class LinkedListDeque<T> {
+import java.util.Iterator;
+import java.util.Objects;
+
+public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private class DequeNode {
         public T item;
         public DequeNode prev;
@@ -28,6 +31,7 @@ public class LinkedListDeque<T> {
     }
 
     /**　在队头插入元素x　*/
+    @Override
     public void addFirst(T x) {
         size += 1;
         DequeNode newNode = new DequeNode(x, sentinel, sentinel.next);
@@ -36,6 +40,7 @@ public class LinkedListDeque<T> {
     }
 
     /**　在队尾插入元素x　*/
+    @Override
     public void addLast(T x) {
         DequeNode newNode = new DequeNode(x, sentinel.prev, sentinel);
         sentinel.prev.next = newNode;
@@ -43,15 +48,19 @@ public class LinkedListDeque<T> {
         size += 1;
     }
 
-    /** 队空返回true，反之false */
+    /*
+    @Override
     public boolean isEmpty() {
         return (sentinel.next == sentinel) && (sentinel.prev == sentinel);
     }
+    */
 
     /** 返回队列的大小 */
+    @Override
     public int size () { return size; }
 
     /** 从头到尾打印双端队列中的item */
+    @Override
     public void printDeque() {
         DequeNode curNode = sentinel.next;
         while (curNode.next != sentinel) {
@@ -62,6 +71,7 @@ public class LinkedListDeque<T> {
     }
 
     /** 删除双端队列头，并返回新的Front */
+    @Override
     public T removeFirst() {
         if (isEmpty()) {
             return null;
@@ -75,6 +85,7 @@ public class LinkedListDeque<T> {
     }
 
     /** 删除双端队列尾，并返回新的Rear */
+    @Override
     public T removeLast() {
         if (isEmpty()) {
             return null;
@@ -86,7 +97,8 @@ public class LinkedListDeque<T> {
         return Last.item;
     }
 
-    /** 迭代获取给定index处的item */
+    /** 迭代获取队列中第index个item */
+    @Override
     public T get(int index) {
         if (index >= size || index < 0) {
             return null;
@@ -103,4 +115,28 @@ public class LinkedListDeque<T> {
             return cur.item;
         }
     }
+
+    /** 后面将要实现的Deque对象是可迭代的，所以我们需要提供这个方法来返回一个迭代器。*/
+    @Override
+    public Iterator<T> iterator() {
+        return new LinkedListIterator();
+    }
+
+    public class LinkedListIterator implements Iterator<T> {
+        private DequeNode cur;
+        public LinkedListIterator() {
+            cur = sentinel.next;
+        }
+        public boolean hasNext() {
+            return sentinel.prev != cur;
+        }
+        public T next() {
+            T returnItem = (T) cur.item;
+            cur = cur.next;
+            return returnItem;
+        }
+    }
+
+
+
 }

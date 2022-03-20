@@ -1,55 +1,57 @@
 package gh2;
 
-// TODO: uncomment the following import once you're ready to start this portion
-// import deque.Deque;
-// TODO: maybe more imports
+import deque.ArrayDeque;
+import deque.Deque;
+import deque.LinkedListDeque;
 
 //Note: This file will not compile until you complete the Deque implementations
 public class GuitarString {
-    /** Constants. Do not change. In case you're curious, the keyword final
-     * means the values cannot be changed at runtime. We'll discuss this and
-     * other topics in lecture on Friday. */
+    /** 常数. 不要修改. 防止你好奇, 最后的关键词意思是它们在运行时不能被修改
+     *  后面的lecture将会讨论这些 */
     private static final int SR = 44100;      // Sampling Rate
     private static final double DECAY = .996; // energy decay factor
 
-    /* Buffer for storing sound data. */
-    // TODO: uncomment the following line once you're ready to start this portion
-    // private Deque<Double> buffer;
+    /* 存储声音数据的缓存 */
+    private Deque<Double> buffer;
 
-    /* Create a guitar string of the given frequency.  */
+    /* 在给定频率下创建一个吉他字符串  */
     public GuitarString(double frequency) {
-        // TODO: Create a buffer with capacity = SR / frequency. You'll need to
-        //       cast the result of this division operation into an int. For
-        //       better accuracy, use the Math.round() function before casting.
-        //       Your should initially fill your buffer array with zeros.
+        long temp = Math.round(SR / frequency);
+        int capacity = (int) temp;
+        double zero = 0;
+        buffer = new ArrayDeque<>();
+        for (int i = 0; i < capacity; i += 1) {
+            buffer.addLast(zero);
+        }
     }
 
 
-    /* Pluck the guitar string by replacing the buffer with white noise. */
+    /* 用白噪音替换缓存来弹出吉他字符串 */
     public void pluck() {
-        // TODO: Dequeue everything in buffer, and replace with random numbers
-        //       between -0.5 and 0.5. You can get such a number by using:
-        //       double r = Math.random() - 0.5;
-        //
-        //       Make sure that your random numbers are different from each
-        //       other. This does not mean that you need to check that the numbers
-        //       are different from each other. It means you should repeatedly call
-        //       Math.random() - 0.5 to generate new random numbers for each array index.
+        int capacity = buffer.size();
+        while (buffer.size() > 0) {
+            double last = buffer.removeLast();
+        }
+        for (int i = 0; i < capacity; i += 1) {
+            double r = Math.random() - 0.5;
+            buffer.addFirst(r);
+        }
     }
 
-    /* Advance the simulation one time step by performing one iteration of
-     * the Karplus-Strong algorithm.
-     */
+    /* 通过对Karplus-Strong算法进行一次迭代，一步一步推进仿真 */
     public void tic() {
-        // TODO: Dequeue the front sample and enqueue a new sample that is
-        //       the average of the two multiplied by the DECAY factor.
-        //       **Do not call StdAudio.play().**
+        double second = buffer.get(1);
+        System.out.println("Second: " + second);
+        double front = buffer.removeFirst();
+        double newDouble = DECAY * 0.5 * (front + second);
+
+        System.out.println("newDouble: " + newDouble);
+        buffer.addLast(newDouble);
     }
 
-    /* Return the double at the front of the buffer. */
+    /* 返回缓存队列头部的double数字 */
     public double sample() {
-        // TODO: Return the correct thing.
-        return 0;
+        System.out.println("front: " + buffer.get(0));
+        return buffer.get(0);
     }
 }
-    // TODO: Remove all comments that say TODO when you're done.
