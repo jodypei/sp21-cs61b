@@ -17,6 +17,8 @@ public class ArrayDeque<T> {
     public ArrayDeque() {
         items = (T[]) new Object[8];
         size = 0;
+        nextFirst = 0;
+        nextLast = 1;
     }
 
     /** 在nextFirst位置插入元素 */
