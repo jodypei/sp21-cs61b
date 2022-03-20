@@ -65,31 +65,30 @@ public class LinkedListDeque<Item> {
     public Item removeFirst() {
         if (isEmpty()) {
             return null;
-        } else {
-            size -= 1;
-            DequeNode First = sentinel.next;
-            sentinel.next = First.next;
-            First.next.prev = sentinel;
-            return First.item;
         }
+        size -= 1;
+        DequeNode First = sentinel.next;
+        sentinel.next = First.next;
+        First.next.prev = sentinel;
+        return First.item;
+
     }
 
     /** 删除双端队列尾，并返回新的Rear */
     public Item removeLast() {
         if (isEmpty()) {
             return null;
-        } else {
-            size -= 1;
-            DequeNode Last = sentinel.prev;
-            sentinel.prev = Last.prev;
-            Last.prev.next = sentinel;
-            return Last.item;
         }
+        size -= 1;
+        DequeNode Last = sentinel.prev;
+        sentinel.prev = Last.prev;
+        Last.prev.next = sentinel;
+        return Last.item;
     }
 
     /** 迭代获取给定index处的item */
     public Item get(int index) {
-        if (index > size) {
+        if (index >= size || index < 0) {
             return null;
         } else {
             DequeNode cur = sentinel;
