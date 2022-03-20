@@ -1,17 +1,16 @@
 package deque;
 
 import java.util.Comparator;
-import java.util.Iterator;
 
 public class MaxArrayDeque<T> extends ArrayDeque<T> {
-    private Comparator<T> Cmp;
+    private Comparator<T> comparator;
 
     public MaxArrayDeque(Comparator<T> c) {
-        this.Cmp = c;
+        this.comparator = c;
     }
 
     public T max() {
-        return max(this.Cmp);
+        return max(this.comparator);
     }
 
     public T max(Comparator<T> c) {

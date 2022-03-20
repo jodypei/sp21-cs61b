@@ -4,7 +4,6 @@ package deque;
  *  @author 陈国检
  */
 import java.util.Iterator;
-import java.util.Objects;
 
 public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private class DequeNode {
@@ -137,6 +136,22 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         }
     }
 
-
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof ArrayDeque)) {
+            return false;
+        } else if (o == this) {
+            return true;
+        }
+        LinkedListDeque<?> lListDeque = (LinkedListDeque<?>) o;
+        if (lListDeque.size() != size) {
+            return false;
+        }
+        for (int i = 0; i < size; i += 1) {
+            if (lListDeque.get(i) != get(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
 }

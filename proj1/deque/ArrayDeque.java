@@ -155,9 +155,27 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return stepForward(ptr) != nextLast;
         }
         public T next() {
-            T returnItem = items[ptr];
-            ptr += 1;
+            T returnItem = get(ptr);
+            ptr = stepForward(ptr);
             return returnItem;
         }
+    }
+
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof ArrayDeque)) {
+            return false;
+        } else if (o == this) {
+            return true;
+        }
+        ArrayDeque<?> arrayDeque = (ArrayDeque<?>) o;
+        if (arrayDeque.size() != size) {
+            return false;
+        }
+        for (int i = 0; i < size; i += 1) {
+            if (arrayDeque.get(i) != get(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
