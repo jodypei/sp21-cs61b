@@ -3,13 +3,13 @@ package deque;
 /** Linked list based Deque.
  *  @author 陈国检
  */
-public class LinkedListDeque<Item> {
-    public class DequeNode {
-        public Item item;
+public class LinkedListDeque<T> {
+    private class DequeNode {
+        public T item;
         public DequeNode prev;
         public DequeNode next;
 
-        public DequeNode (Item i, DequeNode p, DequeNode n) {
+        public DequeNode (T i, DequeNode p, DequeNode n) {
             item = i;
             prev = p;
             next = n;
@@ -28,7 +28,7 @@ public class LinkedListDeque<Item> {
     }
 
     /**　在队头插入元素x　*/
-    public void addFirst(Item x) {
+    public void addFirst(T x) {
         size += 1;
         DequeNode newNode = new DequeNode(x, sentinel, sentinel.next);
         sentinel.next.prev = newNode;
@@ -36,7 +36,7 @@ public class LinkedListDeque<Item> {
     }
 
     /**　在队尾插入元素x　*/
-    public void addLast(Item x) {
+    public void addLast(T x) {
         DequeNode newNode = new DequeNode(x, sentinel.prev, sentinel);
         sentinel.prev.next = newNode;
         sentinel.prev = newNode;
@@ -62,7 +62,7 @@ public class LinkedListDeque<Item> {
     }
 
     /** 删除双端队列头，并返回新的Front */
-    public Item removeFirst() {
+    public T removeFirst() {
         if (isEmpty()) {
             return null;
         }
@@ -75,7 +75,7 @@ public class LinkedListDeque<Item> {
     }
 
     /** 删除双端队列尾，并返回新的Rear */
-    public Item removeLast() {
+    public T removeLast() {
         if (isEmpty()) {
             return null;
         }
@@ -87,7 +87,7 @@ public class LinkedListDeque<Item> {
     }
 
     /** 迭代获取给定index处的item */
-    public Item get(int index) {
+    public T get(int index) {
         if (index >= size || index < 0) {
             return null;
         } else {
