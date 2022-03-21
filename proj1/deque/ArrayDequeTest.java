@@ -3,6 +3,9 @@ package deque;
 import edu.princeton.cs.algs4.StdRandom;
 import org.junit.Test;
 
+import java.util.Deque;
+import java.util.LinkedList;
+
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertTrue;
 
@@ -14,8 +17,6 @@ public class ArrayDequeTest {
      *
      * && is the "and" operation. */
     public void addIsEmptySizeTest() {
-
-        //System.out.println("Make sure to uncomment the lines below (and delete this print statement).");
 
         ArrayDeque<String> lld1 = new ArrayDeque<String>();
 
@@ -42,8 +43,6 @@ public class ArrayDequeTest {
     /** Adds an item, then removes an item, and ensures that dll is empty afterwards. */
     public void addRemoveTest() {
 
-        //System.out.println("Make sure to uncomment the lines below (and delete this print statement).");
-
         ArrayDeque<Integer> lld1 = new ArrayDeque<Integer>();
         // should be empty
         assertTrue("lld1 should be empty upon initialization", lld1.isEmpty());
@@ -61,8 +60,6 @@ public class ArrayDequeTest {
     @Test
     /* Tests removing from an empty deque */
     public void removeEmptyTest() {
-
-        //System.out.println("Make sure to uncomment the lines below (and delete this print statement).");
 
         ArrayDeque<Integer> lld1 = new ArrayDeque<>();
         lld1.addFirst(3);
@@ -85,7 +82,6 @@ public class ArrayDequeTest {
     /* Check if you can create ArrayDeques with different parameterized types*/
     public void multipleParamTest() {
 
-
         ArrayDeque<String>  lld1 = new ArrayDeque<String>();
         ArrayDeque<Double>  lld2 = new ArrayDeque<Double>();
         ArrayDeque<Boolean> lld3 = new ArrayDeque<Boolean>();
@@ -104,8 +100,6 @@ public class ArrayDequeTest {
     /* check if null is return when removing from an empty ArrayDeque. */
     public void emptyNullReturnTest() {
 
-        //System.out.println("Make sure to uncomment the lines below (and delete this print statement).");
-
         ArrayDeque<Integer> lld1 = new ArrayDeque<Integer>();
 
         boolean passed1 = false;
@@ -113,14 +107,11 @@ public class ArrayDequeTest {
         assertEquals("Should return null when removeFirst is called on an empty Deque,", null, lld1.removeFirst());
         assertEquals("Should return null when removeLast is called on an empty Deque,", null, lld1.removeLast());
 
-
     }
 
     @Test
     /* Add large number of elements to deque; check if order is correct. */
     public void bigLLDequeTest() {
-
-        //System.out.println("Make sure to uncomment the lines below (and delete this print statement).");
 
         ArrayDeque<Integer> lld1 = new ArrayDeque<Integer>();
         for (int i = 0; i < 1000000; i++) {
@@ -133,6 +124,43 @@ public class ArrayDequeTest {
 
         for (double i = 999999; i > 500000; i--) {
             assertEquals("Should have the same value", i, (double) lld1.removeLast(), 0.0);
+        }
+    }
+
+    @Test
+    public void randomizedTest() {
+        ArrayDeque<Integer> L = new ArrayDeque<>();
+        int N = 5000;
+        for (int i = 0; i < N; i += 1) {
+            int operationNumber = StdRandom.uniform(0, 6);
+            if (operationNumber == 0) {
+                // addFirst
+                int randVal = StdRandom.uniform(0, 100);
+                L.addFirst(randVal);
+                System.out.println("addFirst(" + randVal + ")");
+            } else if (operationNumber == 1) {
+                // addLast
+                int randVal = StdRandom.uniform(0, 100);
+                L.addLast(randVal);
+                System.out.println("addLast(" + randVal + ")");
+            } else if (operationNumber == 2) {
+                // size
+                System.out.println("size: " + L.size());
+                assertTrue(L.size() >= 0);
+            } else if (operationNumber == 3) {
+                // removeFirst
+                Integer first = L.removeFirst();
+                System.out.println("removeFirst(" + first + ")");
+            } else if (operationNumber == 4) {
+                // removeLast
+                Integer last = L.removeLast();
+                System.out.println("removeLast(" + last + ")");
+            } else if (L.size() > 0 && operationNumber == 5) {
+                // get
+                int randIndex = StdRandom.uniform(0, L.size());
+                Integer get = L.get(randIndex);
+                System.out.println("get(" + randIndex + "):" + get);
+            }
         }
     }
 }

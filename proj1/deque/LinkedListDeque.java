@@ -7,11 +7,11 @@ import java.util.Iterator;
 
 public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private class DequeNode {
-        public T item;
-        public DequeNode prev;
-        public DequeNode next;
+        private T item;
+        private DequeNode prev;
+        private DequeNode next;
 
-        public DequeNode (T i, DequeNode p, DequeNode n) {
+        public DequeNode(T i, DequeNode p, DequeNode n) {
             item = i;
             prev = p;
             next = n;
@@ -25,7 +25,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     /** 创建一个用于计时测试的LinkedListDeque. */
     public LinkedListDeque() {
         size = 0;
-        sentinel = new DequeNode(null,null, null);
+        sentinel = new DequeNode(null, null, null);
         sentinel.prev = sentinel.next = sentinel;
     }
 
@@ -56,7 +56,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
 
     /** 返回队列的大小 */
     @Override
-    public int size () { return size; }
+    public int size() { return size; }
 
     /** 从头到尾打印双端队列中的item */
     @Override
@@ -76,10 +76,10 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
             return null;
         }
         size -= 1;
-        DequeNode First = sentinel.next;
-        sentinel.next = First.next;
-        First.next.prev = sentinel;
-        return First.item;
+        DequeNode first = sentinel.next;
+        sentinel.next = first.next;
+        first.next.prev = sentinel;
+        return first.item;
 
     }
 
@@ -90,10 +90,10 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
             return null;
         }
         size -= 1;
-        DequeNode Last = sentinel.prev;
-        sentinel.prev = Last.prev;
-        Last.prev.next = sentinel;
-        return Last.item;
+        DequeNode last = sentinel.prev;
+        sentinel.prev = last.prev;
+        last.prev.next = sentinel;
+        return last.item;
     }
 
     /** 迭代获取队列中第index个item */
@@ -106,7 +106,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
             int count = 0;
 
             /* 迭代到index处 */
-            while (count < index) {
+            while (count <= index) {
                 cur = cur.next;
                 count += 1;
             }
@@ -142,7 +142,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
             cur = sentinel.next;
         }
         public boolean hasNext() {
-            return sentinel.prev != cur;
+            return cur != sentinel;
         }
         public T next() {
             T returnItem = (T) cur.item;
@@ -152,17 +152,32 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     }
 
     public boolean equals(Object o) {
-        if (o == null || !(o instanceof ArrayDeque)) {
+        if (o == null) {
             return false;
-        } else if (o == this) {
+        }
+        if (o == this) {
             return true;
         }
-        LinkedListDeque<?> lListDeque = (LinkedListDeque<?>) o;
-        if (lListDeque.size() != size) {
+        if (!(o instanceof Deque)) {
+            return false;
+        }
+        if (o instanceof ArrayDeque) {
+            Deque<?> deckQ = (ArrayDeque<?>) o;
+            return equalsHelper(deckQ);
+        }
+        if (o instanceof LinkedListDeque) {
+            Deque<?> deckQ = (LinkedListDeque<?>) o;
+            return equalsHelper(deckQ);
+        }
+        return false;
+    }
+
+    private boolean equalsHelper(Deque<?> Q) {
+        if (Q.size() != size) {
             return false;
         }
         for (int i = 0; i < size; i += 1) {
-            if (lListDeque.get(i) != get(i)) {
+            if (Q.get(i) != get(i)) {
                 return false;
             }
         }

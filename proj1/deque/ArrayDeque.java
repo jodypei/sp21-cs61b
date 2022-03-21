@@ -3,6 +3,8 @@ package deque;
 /** Array based Deque.
  *  @author 陈国检
  */
+import org.checkerframework.checker.units.qual.A;
+
 import java.util.Iterator;
 
 public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
@@ -149,30 +151,45 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private class ArrayIterator implements Iterator<T> {
         private int ptr;
         public ArrayIterator() {
-            ptr = stepForward(nextFirst);
+            ptr = 0;
         }
         public boolean hasNext() {
-            return stepForward(ptr) != nextLast;
+            return ptr < size;
         }
         public T next() {
-            T returnItem = get(ptr);
-            ptr = stepForward(ptr);
+            T returnItem = items[ptr];
+            ptr += 1;
             return returnItem;
         }
     }
 
     public boolean equals(Object o) {
-        if (o == null || !(o instanceof ArrayDeque)) {
+        if (o == null) {
             return false;
-        } else if (o == this) {
+        }
+        if (o == this) {
             return true;
         }
-        ArrayDeque<?> arrayDeque = (ArrayDeque<?>) o;
-        if (arrayDeque.size() != size) {
+        if (!(o instanceof Deque)) {
+            return false;
+        }
+        if (o instanceof ArrayDeque) {
+            Deque<?> deckQ = (ArrayDeque<?>) o;
+            return equalsHelper(deckQ);
+        }
+        if (o instanceof LinkedListDeque) {
+            Deque<?> deckQ = (LinkedListDeque<?>) o;
+            return equalsHelper(deckQ);
+        }
+        return false;
+    }
+
+    private boolean equalsHelper(Deque<?> Q) {
+        if (Q.size() != size) {
             return false;
         }
         for (int i = 0; i < size; i += 1) {
-            if (arrayDeque.get(i) != get(i)) {
+            if (Q.get(i) != get(i)) {
                 return false;
             }
         }
