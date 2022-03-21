@@ -63,7 +63,9 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     /** 返回数组的大小 */
     @Override
-    public int size() { return size; }
+    public int size() {
+        return size;
+    }
 
     /** 数组长度不够就增加空间 */
     private void checkFull() {
@@ -149,7 +151,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     private class ArrayIterator implements Iterator<T> {
         private int ptr;
-        public ArrayIterator() {
+        ArrayIterator() {
             ptr = 0;
         }
         public boolean hasNext() {
@@ -187,10 +189,14 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         if (Q.size() != size) {
             return false;
         }
+
+        int index = stepForward(nextFirst);
         for (int i = 0; i < size; i += 1) {
-            if (Q.get(i) != get(i)) {
+            boolean equals = items[index].equals(Q.get(i));
+            if (!equals) {
                 return false;
             }
+            index = stepForward(index);
         }
         return true;
     }

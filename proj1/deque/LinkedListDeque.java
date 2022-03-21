@@ -11,7 +11,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         private DequeNode prev;
         private DequeNode next;
 
-        public DequeNode(T i, DequeNode p, DequeNode n) {
+        DequeNode(T i, DequeNode p, DequeNode n) {
             item = i;
             prev = p;
             next = n;
@@ -56,7 +56,9 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
 
     /** 返回队列的大小 */
     @Override
-    public int size() { return size; }
+    public int size() {
+        return size;
+    }
 
     /** 从头到尾打印双端队列中的item */
     @Override
@@ -162,24 +164,28 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
             return false;
         }
         if (o instanceof ArrayDeque) {
-            Deque<?> deckQ = (ArrayDeque<?>) o;
+            Deque deckQ = (ArrayDeque) o;
             return equalsHelper(deckQ);
         }
         if (o instanceof LinkedListDeque) {
-            Deque<?> deckQ = (LinkedListDeque<?>) o;
+            Deque deckQ = (LinkedListDeque) o;
             return equalsHelper(deckQ);
         }
         return false;
     }
 
     private boolean equalsHelper(Deque<?> Q) {
-        if (Q.size() != size) {
+        if (Q.size() != size()) {
             return false;
         }
+
+        DequeNode curNode = sentinel.next;
         for (int i = 0; i < size; i += 1) {
-            if (Q.get(i) != get(i)) {
+            boolean equals = curNode.item.equals(Q.get(i));
+            if (!equals) {
                 return false;
             }
+            curNode = curNode.next;
         }
         return true;
     }
