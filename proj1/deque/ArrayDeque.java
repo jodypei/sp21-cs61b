@@ -164,6 +164,11 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         }
     }
 
+    /**
+     * 如果所给Object o类型
+     * @param o
+     * @return
+     */
     public boolean equals(Object o) {
         if (!(o instanceof Deque)) {
             return false;

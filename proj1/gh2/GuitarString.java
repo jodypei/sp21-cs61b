@@ -13,7 +13,7 @@ public class GuitarString {
     /* 存储声音数据的缓存 */
     private Deque<Double> buffer;
 
-    /* 在给定频率下创建一个吉他字符串  */
+    /* 在给定频率下创建一个指定长度的吉他字符串 */
     public GuitarString(double frequency) {
         long temp = Math.round(SR / frequency);
         int capacity = (int) temp;
@@ -24,8 +24,7 @@ public class GuitarString {
         }
     }
 
-
-    /* 用白噪音替换缓存来弹出吉他字符串 */
+    /* 用声音值(-0.5~0.5)填充缓存来弹出吉他字符串 */
     public void pluck() {
         int capacity = buffer.size();
         while (buffer.size() > 0) {
@@ -40,17 +39,14 @@ public class GuitarString {
     /* 通过对Karplus-Strong算法进行一次迭代，一步一步推进仿真 */
     public void tic() {
         double second = buffer.get(1);
-        System.out.println("Second: " + second);
         double front = buffer.removeFirst();
         double newDouble = DECAY * 0.5 * (front + second);
 
-        System.out.println("newDouble: " + newDouble);
         buffer.addLast(newDouble);
     }
 
     /* 返回缓存队列头部的double数字 */
     public double sample() {
-        System.out.println("front: " + buffer.get(0));
         return buffer.get(0);
     }
 }

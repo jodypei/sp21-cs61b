@@ -161,7 +161,6 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         return equalsHelper(deckQ);
     }
 
-
     private boolean equalsHelper(Deque<?> Q) {
         if (Q.size() != size()) {
             return false;

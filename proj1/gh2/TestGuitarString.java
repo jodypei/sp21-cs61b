@@ -51,7 +51,6 @@ public class TestGuitarString  {
         assertNotEquals("After tic(), your samples should not stay the same.", sample1, s.sample());
     }
 
-
     @Test
     public void testTicCalculations() {
         // Create a GuitarString of frequency 11025, which
