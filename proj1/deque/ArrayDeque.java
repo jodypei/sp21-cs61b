@@ -3,7 +3,6 @@ package deque;
 /** Array based Deque.
  *  @author 陈国检
  */
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.Iterator;
 
