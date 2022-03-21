@@ -163,4 +163,19 @@ public class ArrayDequeTest {
             }
         }
     }
+    @Test
+    public void equalsTest() {
+        ArrayDeque<Integer> ad1 = new ArrayDeque<>();
+        ArrayDeque<Integer> ad2 = new ArrayDeque<>();
+
+        ad1.addLast(0);
+        ad2.addLast(0);
+        assertEquals(ad1, ad2);
+
+        ad1.addLast(1);
+        assertNotEquals(ad1, ad2);
+
+        ad2.addLast(2);
+        assertNotEquals(ad1, ad2);
+    }
 }
