@@ -5,6 +5,7 @@ import edu.princeton.cs.algs4.StdDraw;
 
 /** 完整版
  *  客户端，使用合成器包仿真弹拨吉他弦的声音
+ * @author 陈国检
  */
 
 public class GuitarHero {
@@ -20,7 +21,7 @@ public class GuitarHero {
     }
 
     public static void main(String[] args) {
-        /* create two guitar strings, for concert A and C */
+        /* 创建37个琴弦 */
         init();
 
         while (true) {
@@ -33,7 +34,7 @@ public class GuitarHero {
                 }
             }
 
-            /* compute the superposition of samples */
+            /* 计算样本的叠加 */
             double sample = 0;
             for (int i = 0; i < 37; i += 1) {
                 sample += string[i].sample();

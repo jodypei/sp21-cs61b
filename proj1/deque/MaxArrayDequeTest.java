@@ -12,6 +12,7 @@ public class MaxArrayDequeTest {
             return a - b;
         }
     }
+
     @Test
     public void nullTest() {
         MaxArrayDeque<Integer> mad1 = new MaxArrayDeque<>(new IntComparator());

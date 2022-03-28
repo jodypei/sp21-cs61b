@@ -164,11 +164,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         }
     }
 
-    /**
-     * 如果所给Object o类型
-     * @param o
-     * @return
-     */
+    /** 判断所给Object o是否为双端队列且和此队列完全相等 */
     public boolean equals(Object o) {
         if (!(o instanceof Deque)) {
             return false;

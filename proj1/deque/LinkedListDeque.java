@@ -152,7 +152,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
             return returnItem;
         }
     }
-
+    /** 判断所给Object o是否为双端队列且和此队列完全相等 */
     public boolean equals(Object o) {
         if (!(o instanceof Deque)) {
             return false;

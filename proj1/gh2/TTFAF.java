@@ -8,7 +8,6 @@ import java.util.zip.GZIPInputStream;
 
 /**
  * This code does some stuff. Run it (with sound on!) to find out what stuff it does!
- * Requires completion of CS 61B Homework 1.
  *
  * @author Eli Lipsitz
  */
@@ -18,7 +17,7 @@ public class TTFAF {
             InputStream source = new ByteArrayInputStream(Base64.getDecoder().decode(TTFAF));
             source = new GZIPInputStream(source);
             //GuitarPlayer player = new GuitarPlayer(source);
-            GuitarPlayer player = new GuitarPlayer(new java.io.File("C:\\Users\\Jiangfan\\Desktop\\sp21-cs61b\\proj1\\gh2\\test.mid"));
+            GuitarPlayer player = new GuitarPlayer(new java.io.File("C:\\Users\\Jiangfan\\Desktop\\sp21-cs61b\\proj1\\gh2\\test2.mid"));
             player.play();
         } catch (IOException e) {
             e.printStackTrace();
