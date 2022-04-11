@@ -1,15 +1,17 @@
 package gitlet;
 
 import java.io.File;
+import java.util.Date;
+
 import static gitlet.Utils.*;
 
 // TODO: any imports you need here
 
-/** Represents a gitlet repository.
+/** 表示gitlet存储库。
  *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
  *
- *  @author TODO
+ *  @author Guojian Chen
  */
 public class Repository {
     /**
@@ -24,6 +26,15 @@ public class Repository {
     public static final File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
-
+    /** 分支头指针 */
+    public static String master;
+    /** 初始commit的UID */
+    public static final String initUid = Utils.sha1();
     /* TODO: fill in the rest of this class. */
+    public static void init() {
+        Date THE_EPOCH = new Date(0);
+        GITLET_DIR.mkdir();
+        Commit initialCommit = new Commit("initial commit", THE_EPOCH, null, null, initUid);
+        master = initUid;
+    }
 }
