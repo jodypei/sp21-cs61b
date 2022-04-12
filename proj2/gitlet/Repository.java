@@ -1,17 +1,15 @@
 package gitlet;
 
 import java.io.File;
-import java.util.Date;
-
 import static gitlet.Utils.*;
 
 // TODO: any imports you need here
 
-/** 表示gitlet存储库。
+/** Represents a gitlet repository.
  *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
  *
- *  @author Guojian Chen
+ *  @author TODO
  */
 public class Repository {
     /**
@@ -26,15 +24,28 @@ public class Repository {
     public static final File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
-    /** 分支头指针 */
-    public static String master;
-    /** 初始commit的UID */
-    public static final String initUid = Utils.sha1();
+    /** Commits directory */
+    private static final File COMMITS_DIR= join(GITLET_DIR, "commits");
     /* TODO: fill in the rest of this class. */
     public static void init() {
-        Date THE_EPOCH = new Date(0);
-        GITLET_DIR.mkdir();
-        Commit initialCommit = new Commit("initial commit", THE_EPOCH, null, null, initUid);
-        master = initUid;
+        if (GITLET_DIR.exists()) {
+            System.out.println("A Gitlet version-control system already exists in the current directory.");
+            System.exit(0);
+        }
+
+    }
+
+
+    /**
+     * Check whether the number of input parameters meets the requirements.
+     *
+     * @param args Command line argument list
+     * @param n    The expected number of parameters
+     */
+    public static void validateNumArgs(String[] args, int n) {
+        if (args.length != n) {
+            System.out.println("Incorrect operands.");
+            System.exit(0);
+        }
     }
 }

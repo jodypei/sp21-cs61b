@@ -2,12 +2,13 @@ package gitlet;
 
 import java.io.File;
 
-/** 一个调试类，它的主程序可以如下调用:
+/** A debugging class whose main program may be invoked as follows:
  *      java gitlet.DumpObj FILE...
- *  每个文件都是由Utils.writeObject (或任何包含序列化对象的文件)生成的文件。
- *  这将简单地读取FILE，反序列化它，并对结果对象调用dump方法。
- *  对象必须实现 gitlet.Dumpable 接口。
- *  例如，你可以这样定义你的类:
+ *  where each FILE is a file produced by Utils.writeObject (or any file
+ *  containing a serialized object).  This will simply read FILE,
+ *  deserialize it, and call the dump method on the resulting Object.
+ *  The object must implement the gitlet.Dumpable interface for this
+ *  to work.  For example, you might define your class like this:
  *
  *        import java.io.Serializable;
  *        import java.util.TreeMap;
@@ -22,12 +23,14 @@ import java.io.File;
  *            TreeMap<String, String> _mapping = new TreeMap<>();
  *        }
  *
- *  如上所示，你的dump方法应该从你的类对象中打印有用的信息。
+ *  As illustrated, your dump method should print useful information from
+ *  objects of your class.
  *  @author P. N. Hilfinger
  */
 public class DumpObj {
 
-    /** 对files中的每个文件的内容进行反序列化和应用转储。 */
+    /** Deserialize and apply dump to the contents of each of the files
+     *  in FILES. */
     public static void main(String... files) {
         for (String fileName : files) {
             Dumpable obj = Utils.readObject(new File(fileName),
