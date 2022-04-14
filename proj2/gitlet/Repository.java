@@ -2,20 +2,18 @@ package gitlet;
 
 import java.io.File;
 import java.io.Serializable;
-
+import java.nio.file.Paths;
+import java.nio.file.Path;
 import static gitlet.Utils.*;
 
-// TODO: any imports you need here
 
 /** Represents a gitlet repository.
- *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
  *
  *  @author Guojian Chen
  */
 public class Repository {
     /**
-     * TODO: add instance variables here.
      *
      * List all instance variables of the Repository class here with a useful
      * comment above them describing what that variable represents and how that
@@ -26,13 +24,11 @@ public class Repository {
     public static final File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
-    /**
-     * The Stage Object
-     */
-    private static final File STAGE_FILE = join(GITLET_DIR, "stage");
+    /** The Stage Area */
+    private static final File STAGE_FILE = join(GITLET_DIR, "index");
     /**
      * The Objects directory, stores committed blobs & commits
-     * */
+     */
     private static final File COMMITS_DIR= join(GITLET_DIR, "commits");
     private static final File BLOBS_DIR = join(GITLET_DIR, "blobs");
     /**
@@ -40,18 +36,33 @@ public class Repository {
      * @param REFS_DIR
      * @param BRANCH_HEADS_DIR
      * @param REMOTE_DIR
-     * */
+     */
     private static final File REFS_DIR = join(GITLET_DIR, "refs");
     private static final File BRANCH_HEADS_DIR = join(REFS_DIR, "heads");
     /**
      * The HEAD Object, stores current branch's name if it points to tip
      */
     private static final File HEAD = join(GITLET_DIR, "HEAD");
+
+    /** the head commit. */
+    private Commit theHead;
     /** the stage. */
     private Stage theStage;
-
-    /* TODO: fill in the rest of this class. */
-
+    /** SHA1 length. (1 character ~ 4 bits) */
+    private static final int SHA1_LENGTH = 40;
+    /** HEAD ref prefix */
+    private static final String HEAD_BRANCH_REF_PREFIX = "ref: refs/heads/";
+    /**
+     * INITIALIZE a Repo at Current Working Directory(CWD).
+     *
+     * .gitlet
+     *  > HEAD      -> File
+     *  > blobs     -> Content
+     *  > commits   -> Content
+     *  > index     -> File
+     *  > refs      -> (Content)
+     *     >> heads -> [master][branch name]
+     */
     public void init() {
         /* Failure Case */
         if (GITLET_DIR.exists()) {
@@ -62,33 +73,79 @@ public class Repository {
             }
         }
         /* Create Repo Skeleton */
-        GITLET_DIR.mkdirs();
-        BLOBS_DIR.mkdirs();
-        COMMITS_DIR.mkdirs();
-        REFS_DIR.mkdirs();
-        BRANCH_HEADS_DIR.mkdirs();
+        GITLET_DIR.mkdir();
+        BLOBS_DIR.mkdir();
+        COMMITS_DIR.mkdir();
+        REFS_DIR.mkdir();
+        BRANCH_HEADS_DIR.mkdir();
         /* Create then Save(i.e. Persistence) Stage Area */
         theStage = new Stage();
         Utils.writeObject(STAGE_FILE, theStage);
         /* Initial Commit */
-        Commit initialCommit = new Commit("initial commit", null);
+        Commit initialCommit = new Commit();
         /* Create Branch: master */
-        writeContents(join(BRANCH_HEADS_DIR, "master"), initialCommit.getThisKey());
+        writeContents(join(BRANCH_HEADS_DIR, "master"), initialCommit.getThisKey() + '\n');
         /* Create HEAD */
-        writeContents(HEAD, BRANCH_HEADS_DIR + "master");
+        writeContents(HEAD, HEAD_BRANCH_REF_PREFIX + "master");
     }
 
     /**
-     * set branch to a commit.
-     * @param branchFile the file of the branch.
-     * @param commit     the target commit.
+     * ADD a copy of the currently existing file to the Stage Area.
+     *
+     * @param args args[0]: 'add'
+     *             args[1]: filename
      */
-    private void setBranch(File branchFile, Commit commit) {
-        Utils.writeContents(branchFile, commit.getThisKey() + '\n');
+    public void add(String[] args) {
+        validateRepo();
+        getTheHead();
+        readTheStage();
+        /* Failure Case */
+        File file = join(CWD, args[1]);
+        if (!file.exists()) {
+            throw Utils.error("File does not exist.");
+        }
+
+        /* Construct a Blob */
+        Blob blob = new Blob(args[1], CWD);
+        String blobId = blob.getId();
+
+        /* get the SHA1 key of the head  */
+        String headCommitId;
+        if (theHead == null) {
+            headCommitId = null;
+        } else {
+            headCommitId = theHead.getTracked().get(args[1]);
+        }
+        if (headCommitId != null) {
+            if (headCommitId.equals(blobId)) {
+                theStage.getFilesToAdd().remove(args[1]);
+                theStage.getFilesRemoved().remove(args[1]);
+            }
+        }
+
+        String prevBlobId = theStage.getFilesToAdd().put(args[1], blobId);
+        if (prevBlobId != null && prevBlobId.equals(blobId)) {
+            writeObject(STAGE_FILE, theStage);
+        }
+
+        if (!join(CWD, blob.getFilename()).exists()) {
+            writeObject(join(CWD, blob.getFilename()), blob);
+        }
     }
 
     /**
-     * Check whether the number of input parameters meets the requirements.
+     * COMMIT a commit.
+     *
+     * @param commit .
+
+    public void commit(Commit commit) {
+        File commitFile = getPath("commits", commit.getKey()).toFile();
+        Utils.writeObject(commitFile, commit);
+        theStage.clean(this);
+    }
+    */
+    /**
+     * Check whether the Number of input arguments meets the requirement.
      *
      * @param args Command line argument list
      * @param n    The expected number of parameters
@@ -98,5 +155,77 @@ public class Repository {
             System.out.println("Incorrect operands.");
             System.exit(0);
         }
+    }
+    /**
+     * Validate the repo subdir internal structure.
+     * Init theHead.
+     * Init theStage.
+     */
+    private void validateRepo() {
+        /* Validate the repo */
+        if (!GITLET_DIR.isDirectory()) {
+            throw Utils.error("Not in an initialized Gitlet directory.");
+        }
+    }
+    /**
+     *  get theHead :  get the head Commit of a branch.
+     */
+    private void getTheHead() {
+        if (theHead != null) {
+            return;
+        }
+        /* Get the head Commit of a branch */
+        String content = Utils.readContentsAsString(HEAD).strip();
+        if (!content.startsWith("ref: ")) {
+            throw Utils.error("corrupted internal structure");
+        }
+        /* remove the first 5 character --- "ref: " */
+        Path relativePath = Paths.get(content.strip().substring(5));
+        assert (relativePath.startsWith("refs"));
+        assert (!relativePath.isAbsolute());
+
+        /* get the Branch Name */
+        String branchName = readContentsAsString(HEAD).substring(16);
+
+        /* find the Branch File in 'ref/heads' Directory */
+        File branchHeadFile = join(BRANCH_HEADS_DIR, branchName);
+        assert (branchHeadFile.exists());
+
+        /* read the content(SHA1 key) in branchFile */
+        String sha1Key = Utils.readContentsAsString(branchHeadFile).strip();
+
+        /* cast the SHA1 Key to Commit (deserialize) */
+        theHead = castIdToCommit(sha1Key);
+    }
+    /**
+     * read theStage :  read from the Stage Area.
+     */
+    private void readTheStage() {
+        /* Read from the Stage Area(File) if theStage is null, else not change */
+        if (theStage == null) {
+            theStage = Utils.readObject(STAGE_FILE, Stage.class);
+        }
+    }
+    /**
+     * Check whether the given content is a valid SHA1 key.
+     *
+     * @param content a 160-bit integer hash generated from ANY Byte Sequence
+     */
+    private boolean isKey(String content) {
+        return content.length() == SHA1_LENGTH;
+    }
+
+    /**
+     * Convert the given SHA1 Key to Commit,
+     * if corresponding commit file exists.
+     *
+     * @param commitId SHA1 Key
+     */
+    private Commit castIdToCommit(String commitId) {
+        File file = join(COMMITS_DIR, commitId);
+        if (commitId.equals("null") || !file.exists()) {
+            return null;
+        }
+        return readObject(file, Commit.class);
     }
 }

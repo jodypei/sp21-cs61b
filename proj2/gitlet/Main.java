@@ -24,6 +24,8 @@ public class Main {
                 repo.init();
                 break;
             case "add":
+                repo.validateNumArgs(args, 2);
+                repo.add(args);
                 // TODO: handle the `add [filename]` command
                 break;
             // TODO: FILL THE REST IN
