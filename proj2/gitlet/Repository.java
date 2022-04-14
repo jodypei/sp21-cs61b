@@ -29,7 +29,7 @@ public class Repository {
     /**
      * The Objects directory, stores committed blobs & commits
      */
-    private static final File COMMITS_DIR= join(GITLET_DIR, "commits");
+    private static final File COMMITS_DIR = join(GITLET_DIR, "commits");
     private static final File BLOBS_DIR = join(GITLET_DIR, "blobs");
     /**
      * The Branches directory
@@ -67,7 +67,9 @@ public class Repository {
         /* Failure Case */
         if (GITLET_DIR.exists()) {
             if (GITLET_DIR.isDirectory()) {
-                throw Utils.error("A Gitlet version-control system already exists in the current directory");
+                System.out.println("A Gitlet version-control system" +
+                        " already exists in the current directory.");
+                System.exit(0);
             } else {
                 GITLET_DIR.delete();
             }
@@ -84,7 +86,8 @@ public class Repository {
         /* Initial Commit */
         Commit initialCommit = new Commit();
         /* Create Branch: master */
-        writeContents(join(BRANCH_HEADS_DIR, "master"), initialCommit.getThisKey() + '\n');
+        writeContents(join(BRANCH_HEADS_DIR, "master"),
+                initialCommit.getThisKey() + '\n');
         /* Create HEAD */
         writeContents(HEAD, HEAD_BRANCH_REF_PREFIX + "master");
     }
@@ -102,7 +105,8 @@ public class Repository {
         /* Failure Case */
         File file = join(CWD, args[1]);
         if (!file.exists()) {
-            throw Utils.error("File does not exist.");
+            System.out.println("File does not exist.");
+            System.exit(0);
         }
 
         /* Construct a Blob */

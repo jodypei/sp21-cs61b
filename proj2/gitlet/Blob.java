@@ -25,9 +25,9 @@ public class Blob implements Serializable {
      *
      * Blob.content = file.content(null if the file doesn't exist)
      */
-    public Blob(String filename, File CWD) {
+    public Blob(String filename, File curDirectory) {
         this.filename = filename;
-        File file = join(CWD, filename);
+        File file = join(curDirectory, filename);
 
         if (file.exists()) {
             this.content = readContents(file);
