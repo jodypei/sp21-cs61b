@@ -60,7 +60,7 @@ public class Repository {
      *  > blobs     -> Content
      *  > commits   -> Content
      *  > index     -> File
-     *  > refs      -> (Content)
+     *  > refs      -> Content
      *     >> heads -> [master][branch name]
      */
     public void init() {
@@ -85,6 +85,8 @@ public class Repository {
         Utils.writeObject(STAGE_FILE, theStage);
         /* Initial Commit */
         Commit initialCommit = new Commit();
+        File initCmt = join(COMMITS_DIR, initialCommit.getThisKey());
+        writeObject(initCmt, initialCommit);
         /* Create Branch: master */
         writeContents(join(BRANCH_HEADS_DIR, "master"),
                 initialCommit.getThisKey() + '\n');
@@ -114,40 +116,53 @@ public class Repository {
         String blobId = blob.getId();
 
         /* get the SHA1 key of the head  */
-        String headCommitId;
-        if (theHead == null) {
-            headCommitId = null;
-        } else {
-            headCommitId = theHead.getTracked().get(args[1]);
-        }
+        String headCommitId = theHead.getTracked().get(args[1]);
+
         if (headCommitId != null) {
             if (headCommitId.equals(blobId)) {
                 theStage.getFilesToAdd().remove(args[1]);
                 theStage.getFilesRemoved().remove(args[1]);
             }
         }
-
+        /* if the file was staged once, prevBlobId != blobId */
         String prevBlobId = theStage.getFilesToAdd().put(args[1], blobId);
         if (prevBlobId != null && prevBlobId.equals(blobId)) {
             writeObject(STAGE_FILE, theStage);
         }
 
-        if (!join(CWD, blob.getFilename()).exists()) {
-            writeObject(join(CWD, blob.getFilename()), blob);
+        if (!join(BLOBS_DIR, blob.getFilename()).exists()) {
+            File temp = join(BLOBS_DIR, blobId);
+            writeObject(temp, blobId);
         }
     }
 
-    /**
-     * COMMIT a commit.
+    /**s
+     * COMMIT.
      *
-     * @param commit .
+     * @param msg
+     */
+    public void commit(String msg) {
+        validateRepo();
+        getTheHead();
+        readTheStage();
+        if (theStage.isEmptyStage()) {
+            System.out.println("No changes added to the commit.");
+            System.exit(0);
+        }
+        /* Put all files staged to add into the HashTable of theHead*/
+        theHead.getTracked().putAll(theStage.getFilesToAdd());
+        /* Remove the files staged to add in Stage Area */
+        for (String filename : theStage.getFilesRemoved()) {
+            theHead.getTracked().remove(filename);
+        }
 
-    public void commit(Commit commit) {
-        File commitFile = getPath("commits", commit.getKey()).toFile();
-        Utils.writeObject(commitFile, commit);
-        theStage.clean(this);
+        theStage.clearStage();
+        writeObject(STAGE_FILE, theStage);
+
+        Commit newCommit = new Commit(msg, theHead, theStage);
+        writeObject();
     }
-    */
+
     /**
      * Check whether the Number of input arguments meets the requirement.
      *
