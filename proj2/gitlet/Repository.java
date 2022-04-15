@@ -160,7 +160,8 @@ public class Repository {
         writeObject(STAGE_FILE, theStage);
 
         Commit newCommit = new Commit(msg, theHead, theStage);
-        writeObject();
+        File temp = join(COMMITS_DIR,newCommit.getThisKey());
+        writeObject(temp, newCommit.getThisKey());
     }
 
     /**
