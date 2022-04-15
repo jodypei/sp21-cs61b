@@ -41,6 +41,7 @@ public class Commit implements Serializable {
         this.timeStamp = new Date(0);
         this.id = sha1(message, timeStamp.toString());
         this.tracked = new HashMap<>();
+        this.parentKey = null;
     }
 
     /**

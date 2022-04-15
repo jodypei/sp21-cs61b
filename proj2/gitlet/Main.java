@@ -29,7 +29,11 @@ public class Main {
                 // TODO: handle the `add [filename]` command
                 break;
             // TODO: FILL THE REST IN
-
+            case "commit":
+                repo.validateNumArgs(args, 2);
+                repo.commit(args[1]);
+                // TODO: handle the `add [filename]` command
+                break;
             default:
                 System.out.println("No command with that name exists.");
                 System.exit(0);

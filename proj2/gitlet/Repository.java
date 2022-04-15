@@ -115,25 +115,32 @@ public class Repository {
         Blob blob = new Blob(args[1], CWD);
         String blobId = blob.getId();
 
-        /* get the SHA1 key of the head  */
+        /* Check if the current working version of the file
+            is identical to the version in the current commit */
         String headCommitId = theHead.getTracked().get(args[1]);
-
         if (headCommitId != null) {
             if (headCommitId.equals(blobId)) {
-                theStage.getFilesToAdd().remove(args[1]);
-                theStage.getFilesRemoved().remove(args[1]);
+                if (theStage.getFilesToAdd().remove(args[1]) != null) {
+                    writeObject(STAGE_FILE, theStage);
+                    System.exit(0);
+                } else if (theStage.getFilesRemoved().remove(args[1])) {
+                    writeObject(STAGE_FILE, theStage);
+                    System.exit(0);
+                }
             }
         }
-        /* if the file was staged once, prevBlobId != blobId */
+
+        /* if the file was staged once, prevBlobId = blobId, overwrite */
         String prevBlobId = theStage.getFilesToAdd().put(args[1], blobId);
         if (prevBlobId != null && prevBlobId.equals(blobId)) {
-            writeObject(STAGE_FILE, theStage);
+            System.exit(0);
         }
 
         if (!join(BLOBS_DIR, blob.getFilename()).exists()) {
             File temp = join(BLOBS_DIR, blobId);
             writeObject(temp, blobId);
         }
+        writeObject(STAGE_FILE, theStage);
     }
 
     /**s
