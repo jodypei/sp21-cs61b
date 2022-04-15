@@ -52,6 +52,7 @@ public class Repository {
     private static final int SHA1_LENGTH = 40;
     /** HEAD ref prefix */
     private static final String HEAD_BRANCH_REF_PREFIX = "ref: refs/heads/";
+
     /**
      * INITIALIZE a Repo at Current Working Directory(CWD).
      *
@@ -88,7 +89,7 @@ public class Repository {
         File initCmt = join(COMMITS_DIR, initialCommit.getThisKey());
         writeObject(initCmt, initialCommit);
         /* Create Branch: master */
-        writeContents(join(BRANCH_HEADS_DIR, "master"),
+        writeContents(getBranchHeadFile("master"),
                 initialCommit.getThisKey() + '\n');
         /* Create HEAD */
         writeContents(HEAD, HEAD_BRANCH_REF_PREFIX + "master");
@@ -135,7 +136,7 @@ public class Repository {
         if (prevBlobId != null && prevBlobId.equals(blobId)) {
             System.exit(0);
         }
-
+        /* Create Blob Object if not exists */
         if (!join(BLOBS_DIR, blob.getFilename()).exists()) {
             File temp = join(BLOBS_DIR, blobId);
             writeObject(temp, blobId);
@@ -162,13 +163,18 @@ public class Repository {
         for (String filename : theStage.getFilesRemoved()) {
             theHead.getTracked().remove(filename);
         }
-
         theStage.clearStage();
         writeObject(STAGE_FILE, theStage);
 
-        Commit newCommit = new Commit(msg, theHead, theStage);
-        File temp = join(COMMITS_DIR,newCommit.getThisKey());
-        writeObject(temp, newCommit.getThisKey());
+        /* Create a Commit Object in Directory */
+        Commit newCommit = new Commit(msg, theHead.getThisKey(),
+                null, theHead.getTracked());
+        File temp = join(COMMITS_DIR, newCommit.getThisKey());
+        writeObject(temp, newCommit);
+
+        /* set branch head */
+        File branchHeadFile = getBranchHeadFile(getCurBranchName());
+        writeContents(branchHeadFile, newCommit.getThisKey());
     }
 
     /**
@@ -191,7 +197,8 @@ public class Repository {
     private void validateRepo() {
         /* Validate the repo */
         if (!GITLET_DIR.isDirectory()) {
-            throw Utils.error("Not in an initialized Gitlet directory.");
+            System.out.println("Not in an initialized Gitlet directory.");
+            System.exit(0);
         }
     }
     /**
@@ -204,22 +211,23 @@ public class Repository {
         /* Get the head Commit of a branch */
         String content = Utils.readContentsAsString(HEAD).strip();
         if (!content.startsWith("ref: ")) {
-            throw Utils.error("corrupted internal structure");
+            System.out.println("corrupted internal structure");
+            System.exit(0);
         }
         /* remove the first 5 character --- "ref: " */
         Path relativePath = Paths.get(content.strip().substring(5));
         assert (relativePath.startsWith("refs"));
         assert (!relativePath.isAbsolute());
 
-        /* get the Branch Name */
-        String branchName = readContentsAsString(HEAD).substring(16);
+        /* get the current Branch Name */
+        String branchName = getCurBranchName();
 
         /* find the Branch File in 'ref/heads' Directory */
-        File branchHeadFile = join(BRANCH_HEADS_DIR, branchName);
+        File branchHeadFile = getBranchHeadFile(branchName);
         assert (branchHeadFile.exists());
 
         /* read the content(SHA1 key) in branchFile */
-        String sha1Key = Utils.readContentsAsString(branchHeadFile).strip();
+        String sha1Key = readContentsAsString(branchHeadFile).strip();
 
         /* cast the SHA1 Key to Commit (deserialize) */
         theHead = castIdToCommit(sha1Key);
@@ -230,7 +238,7 @@ public class Repository {
     private void readTheStage() {
         /* Read from the Stage Area(File) if theStage is null, else not change */
         if (theStage == null) {
-            theStage = Utils.readObject(STAGE_FILE, Stage.class);
+            theStage = readObject(STAGE_FILE, Stage.class);
         }
     }
     /**
@@ -254,5 +262,21 @@ public class Repository {
             return null;
         }
         return readObject(file, Commit.class);
+    }
+    /**
+     * Get current branch name.
+     * @return
+     */
+    private String getCurBranchName() {
+        return readContentsAsString(HEAD).substring(16);
+    }
+    /**
+     * Get branch head ref file in refs/heads folder.
+     *
+     * @param branchName Name of the branch
+     * @return File instance
+     */
+    private static File getBranchHeadFile(String branchName) {
+        return join(BRANCH_HEADS_DIR, branchName);
     }
 }

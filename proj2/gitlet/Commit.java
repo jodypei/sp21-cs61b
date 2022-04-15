@@ -46,38 +46,23 @@ public class Commit implements Serializable {
 
     /**
      * Construct a Commit.
-     * @param cmtMessage  commit message.
-     * @param parent      the parent commit.
-     * @param index       the Stage Area.
+     * @param cmtMessage        commit message.
+     * @param parentA           the First parent commit.
+     * @param parentB           the Second parent commit.
+     * @param trackedFilesMap   Map of tracked files.
      */
-    public Commit(String cmtMessage, Commit parent, Stage index) {
+    public Commit(String cmtMessage, String parentA, String parentB, Map<String, String> trackedFilesMap) {
         this.message = cmtMessage;
         this.timeStamp = new Date();
-
-        /* get the SHA1 Key of the parent */
-        if (parent != null) {
-            this.parentKey = parent.getThisKey();
-
-            /* Copy First Parent's HashMap(Blobs) to THIS Commit */
-            for (String filename : parent.tracked.keySet()) {
-                tracked.put(filename, parent.tracked.get(filename));
-            }
-        }
-
-        /* Move the added files from Stage Area to THIS Commit */
-        for (String filename : index.getFilesToAdd().keySet()) {
-            String blobId = index.getFilesToAdd().get(filename);
-            tracked.put(filename, blobId);
-        }
-
-        /* Delete the record in the HashTable of the Commit
-            based on that of the Stage Area */
-        for (String filename : index.getFilesRemoved()) {
-            tracked.remove(filename);
-        }
-
+        this.tracked = trackedFilesMap;
+        this.parentKey = parentA;
+        this.parentKey2 = parentB;
         /* Generate SHA1 Key */
-        this.id = sha1(message, timeStamp.toString(), parentKey, parentKey2, tracked.toString());
+        if (parentKey2 == null) {
+            this.id = sha1(message, timeStamp.toString(), parentKey, tracked.toString());
+        } else {
+            this.id = sha1(message, timeStamp.toString(), parentKey, parentKey2, tracked.toString());
+        }
     }
 
     /**
