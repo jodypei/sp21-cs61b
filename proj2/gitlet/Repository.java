@@ -14,13 +14,6 @@ import static gitlet.Utils.*;
  *  @author Guojian Chen
  */
 public class Repository {
-    /**
-     *
-     * List all instance variables of the Repository class here with a useful
-     * comment above them describing what that variable represents and how that
-     * variable is used. We've provided two examples for you.
-     */
-
     /** The current working directory. */
     public static final File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. */
@@ -145,7 +138,7 @@ public class Repository {
         writeObject(STAGE_FILE, theStage);
     }
 
-    /**s
+    /**
      * COMMIT.
      *
      * @param msg
@@ -177,6 +170,7 @@ public class Repository {
         File branchHeadFile = getBranchHeadFile(getCurBranchName());
         writeContents(branchHeadFile, newCommit.getThisKey());
     }
+
     /**
      * rm a file from the Stage Area.
      *
@@ -187,26 +181,23 @@ public class Repository {
         validateRepo();
         getTheHead();
         readTheStage();
-        if (!theStage.getFilesRemoved().contains(args[1])
-                || theHead.getTracked().get(args[1]) == null) {
-            System.out.println("No reason to remove the file.");
+
+        if (theStage.getFilesToAdd().remove(args[1]) != null) {
+            writeObject(STAGE_FILE, theStage);
             System.exit(0);
         }
 
-        if (theStage.getFilesToAdd().containsKey(args[1])) {
-            theStage.getFilesToAdd().remove(args[1]);
-            writeObject(STAGE_FILE, theStage);
-        }
-
         if (theHead.getTracked().get(args[1]) != null) {
-            theStage.getFilesRemoved().add(args[1]);
-            writeObject(STAGE_FILE, theStage);
+            File fileToDelete = join(CWD, args[1]);
+            if (fileToDelete.exists()) {
+                restrictedDelete(fileToDelete);
+            }
+            if (theStage.getFilesRemoved().add(args[1])) {
+                writeObject(STAGE_FILE, theStage);
+                System.exit(0);
+            }
         }
-
-        File fileToDelete = join(CWD, args[1]);
-        if (fileToDelete.exists() && theHead.getTracked().containsKey(args[1])) {
-            restrictedDelete(fileToDelete);
-        }
+        System.out.println("No reason to remove the file.");
     }
 
     /**
@@ -219,45 +210,46 @@ public class Repository {
         readTheStage();
         StringBuilder statusBuilder = new StringBuilder();
 
-        // branches
+        /* Branches */
         statusBuilder.append("=== Branches ===").append("\n");
         statusBuilder.append("*").append(getCurBranchName()).append("\n");
+        /* get the filenames(except the current Branch File) in ref/heads Directory  */
         String[] branchNames = BRANCH_HEADS_DIR.list((dir, name) -> !name.equals(getCurBranchName()));
+        
         Arrays.sort(branchNames);
         for (String branchName : branchNames) {
             statusBuilder.append(branchName).append("\n");
         }
         statusBuilder.append("\n");
-        // end
+        /* Branches End HERE */
 
         Map<String, String> addedFilesMap = theStage.getFilesToAdd();
-        List<String> removedFilePaths = theStage.getFilesRemoved();
+        List<String> removedFileName = theStage.getFilesRemoved();
 
-        // staged files
+        /* Staged Files */
         statusBuilder.append("=== Staged Files ===").append("\n");
         appendFileNamesInOrder(statusBuilder, addedFilesMap.keySet());
         statusBuilder.append("\n");
-        // end
+        /* Staged Files End HERE */
 
-        // removed files
+        /* Removed Files */
         statusBuilder.append("=== Removed Files ===").append("\n");
-        appendFileNamesInOrder(statusBuilder, removedFilePaths);
+        appendFileNamesInOrder(statusBuilder, removedFileName);
         statusBuilder.append("\n");
-        // end
+        /* Removed Files End HERE */
 
-        // modifications not staged for commit
+        /* Modifications Not Staged For Commit */
         statusBuilder.append("=== Modifications Not Staged For Commit ===").append("\n");
         statusBuilder.append("\n");
-        // end
+        /* Modifications Not Staged For Commit End HERE */
 
-        // untracked files
+        /* Untracked Files */
         statusBuilder.append("=== Untracked Files ===").append("\n");
         statusBuilder.append("\n");
-        // end
+        /* Untracked Files End HERE */
 
         System.out.print(statusBuilder);
     }
-
 
     /**
      * Check whether the Number of input arguments meets the requirement.
@@ -271,6 +263,7 @@ public class Repository {
             System.exit(0);
         }
     }
+
     /**
      * Validate the repo subdir internal structure.
      * Init theHead.
@@ -283,6 +276,7 @@ public class Repository {
             System.exit(0);
         }
     }
+
     /**
      *  get theHead :  get the head Commit of a branch.
      */
@@ -314,6 +308,7 @@ public class Repository {
         /* cast the SHA1 Key to Commit (deserialize) */
         theHead = castIdToCommit(sha1Key);
     }
+
     /**
      * read theStage :  read from the Stage Area.
      */
@@ -323,6 +318,7 @@ public class Repository {
             theStage = readObject(STAGE_FILE, Stage.class);
         }
     }
+
     /**
      * Check whether the given content is a valid SHA1 key.
      *
@@ -345,6 +341,7 @@ public class Repository {
         }
         return readObject(file, Commit.class);
     }
+
     /**
      * Get current branch name.
      * @return
@@ -352,6 +349,7 @@ public class Repository {
     private String getCurBranchName() {
         return readContentsAsString(HEAD).substring(16);
     }
+
     /**
      * Get branch head ref file in refs/heads folder.
      *
