@@ -39,6 +39,9 @@ public class Main {
                 repo.validateNumArgs(args, 2);
                 repo.rm(args);
                 break;
+            case "log":
+                repo.validateNumArgs(args, 1);
+                repo.log();
             case "status":
                 repo.validateNumArgs(args, 1);
                 repo.status();

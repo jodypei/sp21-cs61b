@@ -201,9 +201,34 @@ public class Repository {
     }
 
     /**
+     * Print the HISTORY of current head commit.
+     */
+    public void log() {
+        validateRepo();
+        getTheHead();
+        readTheStage();
+        StringBuilder logBuilder = new StringBuilder();
+
+        Commit curCmt = theHead;
+        while (true) {
+            logBuilder.append("===").append("\n");
+            logBuilder.append("commit").append(" ").append(curCmt.getThisKey()).append("\n");
+            logBuilder.append("Date:").append(" ").append(curCmt.getDate()).append("\n");
+            logBuilder.append(curCmt.getMessage()).append("\n").append("\n");
+            /* Exit. Break when curCmt is initialCommit */
+            if (curCmt.getParentKey() == null && curCmt.getParentKey2() == null) {
+                break;
+            }
+            String firstParentKey = curCmt.getParentKey();
+            System.out.println(firstParentKey);
+            File firstParentCommit = join(COMMITS_DIR, firstParentKey);
+            curCmt = readObject(firstParentCommit, Commit.class);
+        }
+        System.out.println(logBuilder);
+    }
+    /**
      * Print the status.
      */
-    @SuppressWarnings("ConstantConditions")
     public void status() {
         validateRepo();
         getTheHead();
@@ -214,7 +239,8 @@ public class Repository {
         statusBuilder.append("=== Branches ===").append("\n");
         statusBuilder.append("*").append(getCurBranchName()).append("\n");
         /* get the filenames(except the current Branch File) in ref/heads Directory  */
-        String[] branchNames = BRANCH_HEADS_DIR.list((dir, name) -> !name.equals(getCurBranchName()));
+        String[] branchNames = BRANCH_HEADS_DIR.list((dir, name)
+                                        -> !name.equals(getCurBranchName()));
         
         Arrays.sort(branchNames);
         for (String branchName : branchNames) {
@@ -266,8 +292,6 @@ public class Repository {
 
     /**
      * Validate the repo subdir internal structure.
-     * Init theHead.
-     * Init theStage.
      */
     private void validateRepo() {
         /* Validate the repo */
@@ -320,15 +344,6 @@ public class Repository {
     }
 
     /**
-     * Check whether the given content is a valid SHA1 key.
-     *
-     * @param content a 160-bit integer hash generated from ANY Byte Sequence
-     */
-    private boolean isKey(String content) {
-        return content.length() == SHA1_LENGTH;
-    }
-
-    /**
      * Convert the given SHA1 Key to Commit,
      * if corresponding commit file exists.
      *
@@ -353,7 +368,7 @@ public class Repository {
     /**
      * Get branch head ref file in refs/heads folder.
      *
-     * @param branchName Name of the branch
+     * @param branchName  Name of the branch
      * @return File instance
      */
     private static File getBranchHeadFile(String branchName) {
