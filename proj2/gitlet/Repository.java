@@ -1,9 +1,10 @@
 package gitlet;
 
 import java.io.File;
-import java.io.Serializable;
 import java.nio.file.Paths;
 import java.nio.file.Path;
+import java.util.*;
+
 import static gitlet.Utils.*;
 
 
@@ -176,6 +177,87 @@ public class Repository {
         File branchHeadFile = getBranchHeadFile(getCurBranchName());
         writeContents(branchHeadFile, newCommit.getThisKey());
     }
+    /**
+     * rm a file from the Stage Area.
+     *
+     * @param args args[0]: 'rm'
+     *             args[1]: filename
+     */
+    public void rm(String[] args) {
+        validateRepo();
+        getTheHead();
+        readTheStage();
+        if (!theStage.getFilesRemoved().contains(args[1])
+                || theHead.getTracked().get(args[1]) == null) {
+            System.out.println("No reason to remove the file.");
+            System.exit(0);
+        }
+
+        if (theStage.getFilesToAdd().containsKey(args[1])) {
+            theStage.getFilesToAdd().remove(args[1]);
+            writeObject(STAGE_FILE, theStage);
+        }
+
+        if (theHead.getTracked().get(args[1]) != null) {
+            theStage.getFilesRemoved().add(args[1]);
+            writeObject(STAGE_FILE, theStage);
+        }
+
+        File fileToDelete = join(CWD, args[1]);
+        if (fileToDelete.exists() && theHead.getTracked().containsKey(args[1])) {
+            restrictedDelete(fileToDelete);
+        }
+    }
+
+    /**
+     * Print the status.
+     */
+    @SuppressWarnings("ConstantConditions")
+    public void status() {
+        validateRepo();
+        getTheHead();
+        readTheStage();
+        StringBuilder statusBuilder = new StringBuilder();
+
+        // branches
+        statusBuilder.append("=== Branches ===").append("\n");
+        statusBuilder.append("*").append(getCurBranchName()).append("\n");
+        String[] branchNames = BRANCH_HEADS_DIR.list((dir, name) -> !name.equals(getCurBranchName()));
+        Arrays.sort(branchNames);
+        for (String branchName : branchNames) {
+            statusBuilder.append(branchName).append("\n");
+        }
+        statusBuilder.append("\n");
+        // end
+
+        Map<String, String> addedFilesMap = theStage.getFilesToAdd();
+        List<String> removedFilePaths = theStage.getFilesRemoved();
+
+        // staged files
+        statusBuilder.append("=== Staged Files ===").append("\n");
+        appendFileNamesInOrder(statusBuilder, addedFilesMap.keySet());
+        statusBuilder.append("\n");
+        // end
+
+        // removed files
+        statusBuilder.append("=== Removed Files ===").append("\n");
+        appendFileNamesInOrder(statusBuilder, removedFilePaths);
+        statusBuilder.append("\n");
+        // end
+
+        // modifications not staged for commit
+        statusBuilder.append("=== Modifications Not Staged For Commit ===").append("\n");
+        statusBuilder.append("\n");
+        // end
+
+        // untracked files
+        statusBuilder.append("=== Untracked Files ===").append("\n");
+        statusBuilder.append("\n");
+        // end
+
+        System.out.print(statusBuilder);
+    }
+
 
     /**
      * Check whether the Number of input arguments meets the requirement.
@@ -183,7 +265,7 @@ public class Repository {
      * @param args Command line argument list
      * @param n    The expected number of parameters
      */
-    public static void validateNumArgs(String[] args, int n) {
+    public void validateNumArgs(String[] args, int n) {
         if (args.length != n) {
             System.out.println("Incorrect operands.");
             System.exit(0);
@@ -278,5 +360,30 @@ public class Repository {
      */
     private static File getBranchHeadFile(String branchName) {
         return join(BRANCH_HEADS_DIR, branchName);
+    }
+
+    /**
+     * Append lines of file name in order from files paths Set to StringBuilder.
+     *
+     * @param stringBuilder       StringBuilder instance
+     * @param filePathsCollection Collection of file paths
+     */
+    private static void appendFileNamesInOrder(StringBuilder stringBuilder, Collection<String> filePathsCollection) {
+        List<String> filePathsList = new ArrayList<>(filePathsCollection);
+        appendFileNamesInOrder(stringBuilder, filePathsList);
+    }
+
+    /**
+     * Append lines of file name in order from files paths Set to StringBuilder.
+     *
+     * @param stringBuilder StringBuilder instance
+     * @param filePathsList List of file paths
+     */
+    private static void appendFileNamesInOrder(StringBuilder stringBuilder, List<String> filePathsList) {
+        filePathsList.sort(String::compareTo);
+        for (String filePath : filePathsList) {
+            String fileName = Paths.get(filePath).getFileName().toString();
+            stringBuilder.append(fileName).append("\n");
+        }
     }
 }

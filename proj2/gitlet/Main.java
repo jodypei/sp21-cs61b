@@ -19,20 +19,29 @@ public class Main {
         String firstArg = args[0];
         switch(firstArg) {
             case "init":
-                // TODO: handle the `init` command
                 repo.validateNumArgs(args, 1);
                 repo.init();
                 break;
             case "add":
                 repo.validateNumArgs(args, 2);
                 repo.add(args);
-                // TODO: handle the `add [filename]` command
                 break;
-            // TODO: FILL THE REST IN
             case "commit":
                 repo.validateNumArgs(args, 2);
-                repo.commit(args[1]);
-                // TODO: handle the `add [filename]` command
+                String message = args[1];
+                if (message.length() == 0) {
+                    System.out.println("Please enter a commit message.");
+                    System.exit(0);
+                }
+                repo.commit(message);
+                break;
+            case "rm":
+                repo.validateNumArgs(args, 2);
+                repo.rm(args);
+                break;
+            case "status":
+                repo.validateNumArgs(args, 1);
+                repo.status();
                 break;
             default:
                 System.out.println("No command with that name exists.");
