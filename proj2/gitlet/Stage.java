@@ -62,6 +62,9 @@ public class Stage implements Serializable {
         return filesRemoved;
     }
 
+    /**
+     * Clear the Stage Area.
+     */
     public void clearStage() {
         filesToAdd.clear();
         filesRemoved.clear();

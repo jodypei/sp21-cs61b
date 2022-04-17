@@ -7,7 +7,6 @@ import java.util.*;
 
 import static gitlet.Utils.*;
 
-
 /** Represents a gitlet repository.
  *  does at a high level.
  *
@@ -62,8 +61,8 @@ public class Repository {
         /* Failure Case */
         if (GITLET_DIR.exists()) {
             if (GITLET_DIR.isDirectory()) {
-                System.out.println("A Gitlet version-control system" +
-                        " already exists in the current directory.");
+                System.out.println("A Gitlet version-control system"
+                        + " already exists in the current directory.");
                 System.exit(0);
             } else {
                 GITLET_DIR.delete();
@@ -147,22 +146,28 @@ public class Repository {
         validateRepo();
         getTheHead();
         readTheStage();
+
         if (theStage.isEmptyStage()) {
             System.out.println("No changes added to the commit.");
             System.exit(0);
         }
+
+        Commit tempCmt = theHead;
         /* Put all files staged to add into the HashTable of theHead*/
-        theHead.getTracked().putAll(theStage.getFilesToAdd());
+        tempCmt.getTracked().putAll(theStage.getFilesToAdd());
         /* Remove the files staged to add in Stage Area */
         for (String filename : theStage.getFilesRemoved()) {
-            theHead.getTracked().remove(filename);
+            tempCmt.getTracked().remove(filename);
         }
+        /* Clear and update the Stage File */
         theStage.clearStage();
         writeObject(STAGE_FILE, theStage);
 
+        List<String> parents = new ArrayList<>();
+        parents.add(0, theHead.getThisKey());
+
         /* Create a Commit Object in Directory */
-        Commit newCommit = new Commit(msg, theHead.getThisKey(),
-                null, theHead.getTracked());
+        Commit newCommit = new Commit(msg, parents, tempCmt.getTracked());
         File temp = join(COMMITS_DIR, newCommit.getThisKey());
         writeObject(temp, newCommit);
 
@@ -207,25 +212,26 @@ public class Repository {
         validateRepo();
         getTheHead();
         readTheStage();
-        StringBuilder logBuilder = new StringBuilder();
 
+        StringBuffer logBuilder = new StringBuffer();
         Commit curCmt = theHead;
         while (true) {
-            logBuilder.append("===").append("\n");
-            logBuilder.append("commit").append(" ").append(curCmt.getThisKey()).append("\n");
-            logBuilder.append("Date:").append(" ").append(curCmt.getDate()).append("\n");
-            logBuilder.append(curCmt.getMessage()).append("\n").append("\n");
+            System.out.println("===");
+            System.out.println("commit " + curCmt.getThisKey());
+            System.out.println("Date: " + curCmt.getDate());
+            System.out.println(curCmt.getMessage() + "\n");
+
+            List<String> parentKeys = curCmt.getParentKeys();
             /* Exit. Break when curCmt is initialCommit */
-            if (curCmt.getParentKey() == null && curCmt.getParentKey2() == null) {
+            if (parentKeys == null) {
                 break;
             }
-            String firstParentKey = curCmt.getParentKey();
-            System.out.println(firstParentKey);
-            File firstParentCommit = join(COMMITS_DIR, firstParentKey);
-            curCmt = readObject(firstParentCommit, Commit.class);
+
+            curCmt = castIdToCommit(parentKeys.get(0));
         }
-        System.out.println(logBuilder);
+        System.exit(0);
     }
+
     /**
      * Print the status.
      */
@@ -233,14 +239,14 @@ public class Repository {
         validateRepo();
         getTheHead();
         readTheStage();
-        StringBuilder statusBuilder = new StringBuilder();
+        StringBuffer statusBuilder = new StringBuffer();
 
         /* Branches */
         statusBuilder.append("=== Branches ===").append("\n");
         statusBuilder.append("*").append(getCurBranchName()).append("\n");
         /* get the filenames(except the current Branch File) in ref/heads Directory  */
-        String[] branchNames = BRANCH_HEADS_DIR.list((dir, name)
-                                        -> !name.equals(getCurBranchName()));
+        String[] branchNames =
+                BRANCH_HEADS_DIR.list((dir, name) -> !name.equals(getCurBranchName()));
         
         Arrays.sort(branchNames);
         for (String branchName : branchNames) {
@@ -278,69 +284,51 @@ public class Repository {
     }
 
     /**
-     * Check whether the Number of input arguments meets the requirement.
-     *
-     * @param args Command line argument list
-     * @param n    The expected number of parameters
-     */
-    public void validateNumArgs(String[] args, int n) {
-        if (args.length != n) {
-            System.out.println("Incorrect operands.");
-            System.exit(0);
-        }
-    }
-
-    /**
-     * Validate the repo subdir internal structure.
-     */
-    private void validateRepo() {
-        /* Validate the repo */
-        if (!GITLET_DIR.isDirectory()) {
-            System.out.println("Not in an initialized Gitlet directory.");
-            System.exit(0);
-        }
-    }
-
-    /**
      *  get theHead :  get the head Commit of a branch.
      */
     private void getTheHead() {
         if (theHead != null) {
             return;
         }
-        /* Get the head Commit of a branch */
+        /* Get the Head Commit of a branch */
         String content = Utils.readContentsAsString(HEAD).strip();
         if (!content.startsWith("ref: ")) {
             System.out.println("corrupted internal structure");
             System.exit(0);
         }
-        /* remove the first 5 character --- "ref: " */
-        Path relativePath = Paths.get(content.strip().substring(5));
-        assert (relativePath.startsWith("refs"));
-        assert (!relativePath.isAbsolute());
 
         /* get the current Branch Name */
         String branchName = getCurBranchName();
 
-        /* find the Branch File in 'ref/heads' Directory */
+        /* find the Branch File in 'refs/heads' Directory */
         File branchHeadFile = getBranchHeadFile(branchName);
         assert (branchHeadFile.exists());
 
         /* read the content(SHA1 key) in branchFile */
         String sha1Key = readContentsAsString(branchHeadFile).strip();
 
-        /* cast the SHA1 Key to Commit (deserialize) */
-        theHead = castIdToCommit(sha1Key);
+        if (isKey(sha1Key)) {
+            /* cast the SHA1 Key to Commit (deserialize) */
+            theHead = castIdToCommit(sha1Key);
+        }
     }
 
     /**
-     * read theStage :  read from the Stage Area.
+     * Read from the Stage Area(File) if theStage is null, else not change.
      */
     private void readTheStage() {
-        /* Read from the Stage Area(File) if theStage is null, else not change */
         if (theStage == null) {
             theStage = readObject(STAGE_FILE, Stage.class);
         }
+    }
+
+    /**
+     * check wither given content is a sha1 key.
+     * @param content .
+     * @return
+     */
+    private boolean isKey(String content) {
+        return content.length() == SHA1_LENGTH;
     }
 
     /**
@@ -354,7 +342,7 @@ public class Repository {
         if (commitId.equals("null") || !file.exists()) {
             return null;
         }
-        return readObject(file, Commit.class);
+        return Utils.readObject(file, Commit.class);
     }
 
     /**
@@ -378,25 +366,50 @@ public class Repository {
     /**
      * Append lines of file name in order from files paths Set to StringBuilder.
      *
-     * @param stringBuilder       StringBuilder instance
+     * @param stringBuffer       StringBuilder instance
      * @param filePathsCollection Collection of file paths
      */
-    private static void appendFileNamesInOrder(StringBuilder stringBuilder, Collection<String> filePathsCollection) {
+    private static void appendFileNamesInOrder(StringBuffer stringBuffer,
+                                               Collection<String> filePathsCollection) {
         List<String> filePathsList = new ArrayList<>(filePathsCollection);
-        appendFileNamesInOrder(stringBuilder, filePathsList);
+        appendFileNamesInOrder(stringBuffer, filePathsList);
     }
 
     /**
      * Append lines of file name in order from files paths Set to StringBuilder.
      *
-     * @param stringBuilder StringBuilder instance
+     * @param stringBuffer StringBuilder instance
      * @param filePathsList List of file paths
      */
-    private static void appendFileNamesInOrder(StringBuilder stringBuilder, List<String> filePathsList) {
+    private static void appendFileNamesInOrder(StringBuffer stringBuffer,
+                                               List<String> filePathsList) {
         filePathsList.sort(String::compareTo);
         for (String filePath : filePathsList) {
             String fileName = Paths.get(filePath).getFileName().toString();
-            stringBuilder.append(fileName).append("\n");
+            stringBuffer.append(fileName).append("\n");
+        }
+    }
+
+    /**
+     * Check whether the Number of input arguments meets the requirement.
+     *
+     * @param args Command line argument list
+     * @param n    The expected number of parameters
+     */
+    public void validateNumArgs(String[] args, int n) {
+        if (args.length != n) {
+            System.out.println("Incorrect operands.");
+            System.exit(0);
+        }
+    }
+
+    /**
+     * Validate the repo.
+     */
+    private void validateRepo() {
+        if (!GITLET_DIR.isDirectory()) {
+            System.out.println("Not in an initialized Gitlet directory.");
+            System.exit(0);
         }
     }
 }

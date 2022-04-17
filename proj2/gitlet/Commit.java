@@ -13,8 +13,7 @@ import static gitlet.Utils.sha1;
  *  tracked     HashMap      tracking files by SHA1 key(i.e. BlobID)
  *  timeStamp   Date         record the Commit time
  *  message     String       record the log message
- *  parentKey   String       the SHA1 key of the first parent Commit
- *  parentKey2  String       the SHA1 key of the second parent Commit
+ *  parentKeys  List         the SHA1 key of the parent Commits
  *  id          String       the SHA1 key of this Commit
  *
  *  @author Guojian Chen
@@ -26,10 +25,8 @@ public class Commit implements Serializable {
     private Date timeStamp;
     /** Files being tracked (key: file path; value: SHA1 key) */
     private Map<String, String> tracked;
-    /** Parent Commit hash key. */
-    private String parentKey;
-    /** Parent Commit hash key 2, used only in Merge */
-    private String parentKey2;
+    /** Parent Commit hash keys. Hash Key2 used only in Merge*/
+    private List<String> parentKeys;
     /** SHA1 id */
     private String id;
 
@@ -39,30 +36,24 @@ public class Commit implements Serializable {
     public Commit() {
         this.message = "initial commit";
         this.timeStamp = new Date(0);
-        this.id = sha1(message, timeStamp.toString());
         this.tracked = new HashMap<>();
-        this.parentKey = null;
+        this.id = sha1(message, timeStamp.toString());
     }
 
     /**
      * Construct a Commit.
      * @param cmtMessage        commit message.
-     * @param parentA           the First parent commit.
-     * @param parentB           the Second parent commit.
+     * @param parents           the First and the Second parent commit.
      * @param trackedFilesMap   Map of tracked files.
      */
-    public Commit(String cmtMessage, String parentA, String parentB, Map<String, String> trackedFilesMap) {
+    public Commit(String cmtMessage, List<String> parents,
+                  Map<String, String> trackedFilesMap) {
         this.message = cmtMessage;
         this.timeStamp = new Date();
         this.tracked = trackedFilesMap;
-        this.parentKey = parentA;
-        this.parentKey2 = parentB;
+        this.parentKeys = parents;
         /* Generate SHA1 Key */
-        if (parentKey2 == null) {
-            this.id = sha1(message, timeStamp.toString(), parentKey, tracked.toString());
-        } else {
-            this.id = sha1(message, timeStamp.toString(), parentKey, parentKey2, tracked.toString());
-        }
+        this.id = sha1(message, timeStamp.toString(), parentKeys.toString(), tracked.toString());
     }
 
     /**
@@ -71,7 +62,7 @@ public class Commit implements Serializable {
      * @return SHA1 id
      */
     public String getThisKey() {
-        return Utils.sha1(Utils.serialize(this));
+        return this.id;
     }
     /**
      * get the Date(commit time) of this commit.
@@ -95,12 +86,18 @@ public class Commit implements Serializable {
      * return the FIRST parent SHA1 key.
      */
     public String getParentKey() {
-        return parentKey;
+        return parentKeys.get(0);
     }
     /**
      * return the SECOND parent SHA1 key.
      */
     public String getParentKey2() {
-        return parentKey2;
+        return parentKeys.get(1);
+    }
+    /**
+     * return Parents
+     */
+    public List<String> getParentKeys() {
+        return parentKeys;
     }
 }
