@@ -100,11 +100,12 @@ public class Repository {
         /* Failure Case */
         File file = join(CWD, args[1]);
         if (!file.exists()) {
-            System.out.println("File does not exist.");
             if (theStage.getFilesRemoved().contains(args[1])) {
                 theStage.getFilesRemoved().remove(args[1]);
                 writeObject(STAGE_FILE, theStage);
+                System.exit(0);
             }
+            System.out.println("File does not exist.");
             System.exit(0);
         }
 
