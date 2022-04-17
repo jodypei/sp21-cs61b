@@ -2,6 +2,8 @@ package gitlet;
 
 
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.*;
 
@@ -67,8 +69,9 @@ public class Commit implements Serializable {
     /**
      * get the Date(commit time) of this commit.
      */
-    public Date getDate() {
-        return this.timeStamp;
+    public String getDate() {
+        DateFormat dateFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.ENGLISH);
+        return dateFormat.format(timeStamp);
     }
     /**
      * get the message of this commit.
