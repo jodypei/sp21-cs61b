@@ -101,6 +101,10 @@ public class Repository {
         File file = join(CWD, args[1]);
         if (!file.exists()) {
             System.out.println("File does not exist.");
+            if (theStage.getFilesRemoved().contains(args[1])) {
+                theStage.getFilesRemoved().remove(args[1]);
+                writeObject(STAGE_FILE, theStage);
+            }
             System.exit(0);
         }
 
@@ -129,6 +133,7 @@ public class Repository {
         if (prevBlobId != null && prevBlobId.equals(blobId)) {
             System.exit(0);
         }
+
         /* Create Blob Object if not exists */
         if (!join(BLOBS_DIR, blob.getFilename()).exists()) {
             File temp = join(BLOBS_DIR, blobId);
@@ -192,7 +197,7 @@ public class Repository {
             writeObject(STAGE_FILE, theStage);
             System.exit(0);
         }
-
+        /* else remove the file in CWD */
         if (theHead.getTracked().get(args[1]) != null) {
             File fileToDelete = join(CWD, args[1]);
             if (fileToDelete.exists()) {
@@ -229,6 +234,7 @@ public class Repository {
 
             curCmt = castIdToCommit(parentKeys.get(0));
         }
+        System.exit(0);
     }
 
     /**
@@ -280,6 +286,7 @@ public class Repository {
         /* Untracked Files End HERE */
 
         System.out.print(statusBuilder);
+        System.exit(0);
     }
 
     /**
