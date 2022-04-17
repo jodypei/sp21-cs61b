@@ -2,7 +2,6 @@ package gitlet;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.nio.file.Path;
 import java.util.*;
 
 import static gitlet.Utils.*;
@@ -111,10 +110,11 @@ public class Repository {
 
         /* Check if the current working version of the file
             is identical to the version in the current commit */
-        String headCommitId = theHead.getTracked().get(args[1]);
-        if (headCommitId != null) {
-            if (headCommitId.equals(blobId)) {
-                if (theStage.getFilesToAdd().remove(args[1]) != null) {
+        String trackedBlobId = theHead.getTracked().get(args[1]);
+        if (trackedBlobId != null) {
+            if (trackedBlobId.equals(blobId)) {
+                theStage.getFilesToAdd().remove(args[1]);
+                if (theStage.getFilesToAdd() != null) {
                     writeObject(STAGE_FILE, theStage);
                     System.exit(0);
                 } else if (theStage.getFilesRemoved().remove(args[1])) {
@@ -146,7 +146,7 @@ public class Repository {
         validateRepo();
         getTheHead();
         readTheStage();
-
+        /* Check if the Stage is Empty */
         if (theStage.isEmptyStage()) {
             System.out.println("No changes added to the commit.");
             System.exit(0);
@@ -187,6 +187,7 @@ public class Repository {
         getTheHead();
         readTheStage();
 
+        /* remove the file in Stage Area */
         if (theStage.getFilesToAdd().remove(args[1]) != null) {
             writeObject(STAGE_FILE, theStage);
             System.exit(0);
@@ -213,7 +214,6 @@ public class Repository {
         getTheHead();
         readTheStage();
 
-        StringBuffer logBuilder = new StringBuffer();
         Commit curCmt = theHead;
         while (true) {
             System.out.println("===");
@@ -229,7 +229,6 @@ public class Repository {
 
             curCmt = castIdToCommit(parentKeys.get(0));
         }
-        System.exit(0);
     }
 
     /**
@@ -243,7 +242,7 @@ public class Repository {
 
         /* Branches */
         statusBuilder.append("=== Branches ===").append("\n");
-        statusBuilder.append("*").append(getCurBranchName()).append("\n");
+        statusBuilder.append("*" + getCurBranchName() + "\n");
         /* get the filenames(except the current Branch File) in ref/heads Directory  */
         String[] branchNames =
                 BRANCH_HEADS_DIR.list((dir, name) -> !name.equals(getCurBranchName()));
