@@ -40,8 +40,6 @@ public class Repository {
     private Commit theHead;
     /** the stage. */
     private Stage theStage;
-    /** SHA1 length. (1 character ~ 4 bits) */
-    private static final int SHA1_LENGTH = 40;
     /** HEAD ref prefix */
     private static final String HEAD_BRANCH_REF_PREFIX = "ref: refs/heads/";
 
@@ -291,6 +289,42 @@ public class Repository {
     }
 
     /**
+     * branch : create a new branch
+     *
+     * @param args args[0]: branch
+     *             args[1]: new branch name
+     */
+    public void branch(String[] args) {
+        File newBranchHeadFile = getBranchHeadFile(args[1]);
+        if (newBranchHeadFile.exists()) {
+            System.out.println("A branch with that name already exists.");
+            System.exit(0);
+        }
+        writeContents(newBranchHeadFile, theHead.getThisKey());
+    }
+
+    /**
+     * Delete the branch.
+     *
+     * @param args args[0]: branch
+     *             args[1]: branch name
+     */
+    public void rmBranch(String[] args) {
+        File branchToRemove = getBranchHeadFile(args[1]);
+        if (!branchToRemove.exists()) {
+            System.out.println("A branch with that name does not exist.");
+            System.exit(0);
+        }
+        if (args[1].equals(getCurBranchName())) {
+            System.out.println("Cannot remove the current branch.");
+            System.exit(0);
+        }
+        if (!branchToRemove.delete()) {
+            throw new IllegalArgumentException(
+                    String.format("rm: %s: Failed to delete.", branchToRemove.getPath()));
+        }
+    }
+    /**
      *  get theHead :  get the head Commit of a branch.
      */
     private void getTheHead() {
@@ -335,7 +369,7 @@ public class Repository {
      * @return
      */
     private boolean isKey(String content) {
-        return content.length() == SHA1_LENGTH;
+        return content.length() == Utils.UID_LENGTH;
     }
 
     /**

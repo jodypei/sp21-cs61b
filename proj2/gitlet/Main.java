@@ -43,6 +43,9 @@ public class Main {
                 repo.validateNumArgs(args, 1);
                 repo.status();
                 break;
+            case "branch":
+                repo.validateNumArgs(args, 2);
+                repo.branch(args);
             default:
                 System.out.println("No command with that name exists.");
                 System.exit(0);
