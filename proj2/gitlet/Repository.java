@@ -295,11 +295,16 @@ public class Repository {
      *             args[1]: new branch name
      */
     public void branch(String[] args) {
+        validateRepo();
+        getTheHead();
+        readTheStage();
+        /* check whether the branch exists */
         File newBranchHeadFile = getBranchHeadFile(args[1]);
         if (newBranchHeadFile.exists()) {
             System.out.println("A branch with that name already exists.");
             System.exit(0);
         }
+        /* create */
         writeContents(newBranchHeadFile, theHead.getThisKey());
     }
 
@@ -310,6 +315,9 @@ public class Repository {
      *             args[1]: branch name
      */
     public void rmBranch(String[] args) {
+        validateRepo();
+        getTheHead();
+        readTheStage();
         File branchToRemove = getBranchHeadFile(args[1]);
         if (!branchToRemove.exists()) {
             System.out.println("A branch with that name does not exist.");
@@ -319,6 +327,7 @@ public class Repository {
             System.out.println("Cannot remove the current branch.");
             System.exit(0);
         }
+        /* delete */
         if (!branchToRemove.delete()) {
             throw new IllegalArgumentException(
                     String.format("rm: %s: Failed to delete.", branchToRemove.getPath()));
