@@ -22,7 +22,7 @@ public class Repository {
      * The Objects directory, stores committed blobs & commits
      */
     private static final File COMMITS_DIR = join(GITLET_DIR, "commits");
-    private static final File BLOBS_DIR = join(GITLET_DIR, "blobs");
+    public static final File BLOBS_DIR = join(GITLET_DIR, "blobs");
     /**
      * The Branches directory
      * @param REFS_DIR
@@ -136,7 +136,7 @@ public class Repository {
         /* Create Blob Object if not exists */
         if (!join(BLOBS_DIR, blob.getFilename()).exists()) {
             File temp = join(BLOBS_DIR, blobId);
-            writeObject(temp, blobId);
+            writeObject(temp, blob);
         }
         writeObject(STAGE_FILE, theStage);
     }
@@ -333,6 +333,50 @@ public class Repository {
                     String.format("rm: %s: Failed to delete.", branchToRemove.getPath()));
         }
     }
+
+    /**
+     * Checkout file from HEAD commit.
+     *
+     * @param filename name of the file to restore
+     */
+    public void checkout(String filename) {
+        validateRepo();
+        getTheHead();
+        readTheStage();
+
+        String blobID = theHead.getTracked().get(filename);
+        if (blobID == null) {
+            System.out.println("File does not exist in that commit.");
+            System.exit(0);
+        } else {
+           Blob blobInstance = castIdToBlob(blobID);
+           writeContents(join(CWD, filename), blobInstance.getContent());
+           System.exit(0);
+        }
+    }
+
+    /**
+     * Checkout file from specific commit.
+     *
+     * @param filename name of the file to restore
+     */
+    public void checkout(String cmtId, String filename) {
+        validateRepo();
+        getTheHead();
+        readTheStage();
+
+        Commit cmt = castIdToCommit(cmtId);
+        String blobID = cmt.getTracked().get(filename);
+        if (blobID == null) {
+            System.out.println("File does not exist in that commit.");
+            System.exit(0);
+        } else {
+            Blob blobInstance = castIdToBlob(blobID);
+            writeContents(join(CWD, filename), blobInstance.getContent());
+            System.exit(0);
+        }
+    }
+
     /**
      *  get theHead :  get the head Commit of a branch.
      */
@@ -393,6 +437,20 @@ public class Repository {
             return null;
         }
         return Utils.readObject(file, Commit.class);
+    }
+
+    /**
+     * Convert the given SHA1 Key to Commit,
+     * if corresponding commit file exists.
+     *
+     * @param blobId SHA1 Key
+     */
+    private Blob castIdToBlob(String blobId) {
+        File file = join(BLOBS_DIR, blobId);
+        if (blobId.equals("null") || !file.exists()) {
+            return null;
+        }
+        return Utils.readObject(file, Blob.class);
     }
 
     /**

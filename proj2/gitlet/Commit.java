@@ -66,37 +66,30 @@ public class Commit implements Serializable {
     public String getThisKey() {
         return this.id;
     }
+
     /**
      * get the Date(commit time) of this commit.
      */
+
     public String getDate() {
         DateFormat dateFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.ENGLISH);
         return dateFormat.format(timeStamp);
     }
+
     /**
      * get the message of this commit.
      */
     public String getMessage() {
         return this.message;
     }
+
     /**
      * get the Blobs(tracked files) contained in this commit.
      */
     public Map<String, String> getTracked() {
         return this.tracked;
     }
-    /**
-     * return the FIRST parent SHA1 key.
-     */
-    public String getParentKey() {
-        return parentKeys.get(0);
-    }
-    /**
-     * return the SECOND parent SHA1 key.
-     */
-    public String getParentKey2() {
-        return parentKeys.get(1);
-    }
+
     /**
      * return Parents
      */

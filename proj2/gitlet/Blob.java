@@ -14,11 +14,11 @@ import static gitlet.Utils.*;
  */
 public class Blob implements Serializable {
     /** the filename */
-    private String filename;
+    private final String filename;
     /** content of the file */
-    private byte[] content;
+    private final byte[] content;
     /** Blob id */
-    private String id;
+    private final String id;
 
     /**
      * Construct a Blob in CWD.
