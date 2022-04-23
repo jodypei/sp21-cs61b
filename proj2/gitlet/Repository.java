@@ -306,6 +306,7 @@ public class Repository {
         }
         /* create */
         writeContents(newBranchHeadFile, theHead.getThisKey());
+        System.exit(0);
     }
 
     /**
@@ -332,6 +333,7 @@ public class Repository {
             throw new IllegalArgumentException(
                     String.format("rm: %s: Failed to delete.", branchToRemove.getPath()));
         }
+        System.exit(0);
     }
 
     /**
@@ -349,9 +351,9 @@ public class Repository {
             System.out.println("File does not exist in that commit.");
             System.exit(0);
         } else {
-           Blob blobInstance = castIdToBlob(blobID);
-           writeContents(join(CWD, filename), blobInstance.getContent());
-           System.exit(0);
+            Blob blobInstance = castIdToBlob(blobID);
+            writeContents(join(CWD, filename), blobInstance.getContent());
+            System.exit(0);
         }
     }
 
