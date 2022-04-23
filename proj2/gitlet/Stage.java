@@ -31,18 +31,6 @@ public class Stage implements Serializable {
     }
 
     /**
-     * Add a file with its blobID to the Stage Area.
-     * Record the filename.
-     *
-     * Key: filename
-     * Value: BlobID(i.e. SHA1 Key generated from the file)
-     */
-    public void addFile(String filename, String blobID) {
-        filesToAdd.put(filename, blobID);
-        filesRemoved.remove(filename);
-    }
-
-    /**
      * Check if the Stage Area is Empty.
      */
     public boolean isEmptyStage() {

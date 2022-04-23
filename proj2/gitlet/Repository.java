@@ -367,6 +367,9 @@ public class Repository {
         getTheHead();
         readTheStage();
 
+        if (isKey(cmtId)) {
+            System.exit(0);
+        }
         Commit cmt = castIdToCommit(cmtId);
         String blobID = cmt.getTracked().get(filename);
         if (blobID == null) {
